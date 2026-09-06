@@ -1,0 +1,110 @@
+Create MVP web application for small sports club management named Klubster. Frontend: React (with Axios, React Router, Context API), Backend: Django + Django REST Framework, SQLite, JWT Auth, Dockerized.
+RESTful API for all features, clean UI, basic styling, ready for deployment (Docker + Heroku/Vercel).
+
+#### Initial  for Django #########
+python -m venv venv
+.\venv\Scripts\activate
+pip install django djangorestframework djangorestframework-simplejwt django-cors-headers
+
+######### BACKEND ###########
+Types of view in Django:
+    1. Function-Based Views (FBV)
+        Regular Python functions that take a request and return a response.
+    2. Class-Based Views (CBV)
+        Classes that inherit from Django’s View or its subclasses.
+    3. Generic Class-Based Views:
+        Pre-built views for common patterns (list, detail, create, update, delete).
+    4. API Views (with Django REST Framework):
+        ApiView(manual more control) / Viewsets( auto) 
+        
+JWT authentication (short for JSON Web Token authentication)
+cd backend
+on windows
+    .\venv\Scripts\activate
+on linux
+    source venv/bin/activate
+django-admin startproject klubster -> only for new projects
+cd backend
+django-admin startapp club
+
+## todo: Restriction acces for Memebers ### 
+Use Django’s permissions or DRF’s permission classes to restrict access in views.
+
+RestAPI 
+    - OpenAPI Documentation (Swagger) -> pytho drf-spectacular
+    - Serializer is for user input(form data) validation
+
+
+## Emails Mailpit (local)
+    admin.club1@test.local
+    coach.club1@test.local
+    parent.club1@test.local
+    child.club1@test.local
+    child2.club1@test.local
+    player.club1@test.local
+    
+
+    How to run Mailpit manually:
+        see in docs/mailpit 
+        Open Mailpit UI:
+            http://localhost:8025
+
+## Start Frontend:
+    cd backend
+    python manage.py runserver
+
+# Pytest:
+    1. Ctrl-Shift-P : python: select interpreter
+
+# Debug mode 
+    1. python -m debugpy --listen 5678 manage.py runserver
+    2. and then -> "Attach to Django Backend" from launch.json
+
+The backend will be available at: http://127.0.0.1:8000/
+
+## Manage Database:
+    Database sqlite3
+    python manage.py shell (database debug)
+    sqlite3 db.sqlite3
+        .tables
+        SELECT * FROM club_member;
+        DELETE FROM club_member WHERE id = MEMBER_ID;
+        drop table name
+        PRAGMA table_info(table_name);
+        DELETE FROM club_member; -> remove all entries from table
+        .quit -> leave session
+
+## Create default objects over signals
+     Use ready() in your app's apps.py
+
+## Django Extensions + Graphviz (show graphical model dependencies)
+    -> pip install django-extensions graphviz
+    -> Add 'django_extensions' to INSTALLED_APPS in settings.py
+    -> manage.py graph_models -a -o models.png
+    Install Graphviz system package:
+    On Windows, download and install Graphviz from: https://graphviz.gitlab.io/download/
+    Add the Graphviz bin folder (e.g., C:\Program Files\Graphviz\bin) to your system PATH.
+    + buildtools C++ 14.0
+
+
+#############  FRONDEND ##################
+Techstack: (npm / Node.js), Bootstrap
+    npx create-react-app frontend --template cra-template-pwa
+    access, refresh tokens
+
+Context API
+
+cd frontend
+npm start
+
+The frontend will be available at: http://localhost:3000/
+
+The React.useEffect hook in your code is used to run side effects in your component.
+     "hook" is a special function that lets you use React features (like state, context, or lifecycle methods) inside functional components.
+    The most common hooks are useState, useEffect, and useContext.
+
+######### UI #########
+Size of my phone: samsung galaxy S21 
+    Typical CSS viewport for emulation: 360 × 800 px
+
+

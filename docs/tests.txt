@@ -1,0 +1,215 @@
+### Standardizing UI Tests
+It is possible to standardize UI tests similarly to API tests:
+- Use automation frameworks like Selenium, Cypress, or Playwright.
+- Define test cases based on user stories or acceptance criteria.
+- Apply the Page Object Model (POM) for reusable, maintainable code.
+- Store scenarios and expected results in structured formats (e.g., Gherkin with Cucumber).
+- Automate test execution and reporting.
+- Integrate UI tests into CI/CD pipelines.
+While there is no direct equivalent to OpenAPI for UI, structured test definitions and automation frameworks help achieve standardization and maintainability in UI testing.
+###### Tests #########
+
+#######  UI tests ######
+Page Object Model (POM)
+    is a design pattern used in automated testing, especially for UI tests
+    !! POM is not built into the tools, but you can structure your code this
+    way for better organization and maintainability.
+
+Selenium
+    is an open-source framework for automating 
+    web browser interactions
+    POM is a recommended design pattern for organizing Selenium test code,
+    making it easier to maintain and scale your UI tests.
+Selnium IDE 
+    browser plugins like Selenium IDE (for Chrome or Firefox) to record
+    your interactions and export them as Selenium test scripts
+
+Playwright:
+    A modern browser automation library from Microsoft, supporting JavaScript, TypeScript, Python, Java, and C#.
+    It works well with POM for scalable test code.
+
+
+Cucumber: 
+        A tool for behavior-driven development (BDD). It lets you write tests in plain language using the Gherkin syntax and supports integration with languages like Java, JavaScript, and Python.
+        POM can be used with Cucumber for organizing UI tests.
+
+        How to store scenarios and expected results in structured formats (Gherkin):
+        - Write scenarios in .feature files using the Gherkin syntax: Given, When, Then, And, But.
+        - Each scenario describes a user story or test case, with clear steps and expected outcomes.
+        - These files are version-controlled and readable by both technical and non-technical team members.
+        - Cucumber or similar tools parse these files and link steps to automation code, ensuring tests are standardized and maintainable.
+
+        Example (login.feature):
+        Feature: User login
+
+            Scenario: Successful login
+                Given the user is on the login page
+                When the user enters valid credentials
+                And clicks the login button
+                Then the user should see the dashboard
+
+Cypress: 
+    A JavaScript-based end-to-end testing framework for web applications.
+    It supports POM structure and is known for fast, reliable browser automation.
+
+Robot Framework:
+    A generic automation framework with easy-to-read syntax, 
+    supporting Python and other languages. POM can be applied for UI test organization.
+
+
+Comparison: Cucumber vs Robot Framework
+--------------------------------------
+- Cucumber focuses on Behavior-Driven Development (BDD) and uses Gherkin syntax (Given, When, Then) for business-readable scenarios. It integrates with many languages and is best for teams wanting collaborative, business-focused test cases.
+- Robot Framework is a generic, keyword-driven automation framework with a tabular syntax. It is Python-based, extensible with libraries, and good for acceptance, UI, and integration testing, but less focused on business-readable scenarios.
+
+Industry Standard
+-----------------
+There is no single industry standard for test automation tools. Cucumber is popular for BDD and business-collaborative testing, while Robot Framework is widely used for keyword-driven, acceptance, and UI testing. The choice depends on team needs: BDD and business collaboration (Cucumber), or broad, keyword-driven automation (Robot Framework).
+
+All these tools can use the Page Object Model pattern to improve test maintainability and structure.
+
+#### API tests ########
+Pytest(manual, with openapi spezification  -> schemathesis)
+Prism: Can mock and test APIs based on OpenAPI specs.
+    Prism is a Node.js tool (JavaScript/TypeScript) designed for mocking, proxying,
+    and validating APIs using OpenAPI specs. It does not generate or run pytest tests.
+Postman: Import your OpenAPI spec and auto-generate a collection, then use built-in test scripts.
+ 
+##### Professional Test Strategy (API & UI)
+
+1. REST API Testing
+    - Use **pytest** for automated unit and integration tests of API endpoints.
+      - Assert status codes, response data, error handling, authentication, etc.
+    - Use **Postman** for manual exploratory testing, creating collections, and sharing test cases.
+      - Useful for quick checks, documentation, and team collaboration.
+
+2. UI Testing
+    - Use **Selenium** (with pytest) for automated browser tests.
+      - Simulate user actions, check UI elements, validate workflows, and assert page content.
+      - Integrate with pytest for reporting and parametrization.
+
+3. Performance Testing
+    - Use **JMeter** for load and stress testing of APIs and UI endpoints.
+      - Simulate multiple users, measure response times, throughput, and system stability under load.
+
+4. Workflow
+    - Write unit/integration tests for backend logic and APIs with pytest.
+    - Use Postman for manual API checks and to generate test data.
+    - Automate UI flows with Selenium (pytest for structure).
+    - Use JMeter for performance and scalability tests.
+    - Run tests in CI/CD pipelines for continuous feedback.
+
+5. Reporting & Maintenance
+    - Collect and review test reports from pytest, Selenium, and JMeter.
+    - Use Postman collections for documentation and onboarding.
+
+**Summary:**
+pytest: automated API and backend tests  
+Selenium: automated UI tests  
+ 
+Postman: manual API tests and documentation
+    or manual/exploratory testing
+    REST is an architectural style, using HTTP methods (GET, POST, etc.) and can use JSON, XML,
+    or other formats.
+
+RestAssured (Java) 
+    ->RestAssured is the most used for automation in big organizations.
+    ->in python like (request + pytest + request mocks)
+
+SoapUI
+    For SOAP/legacy systems also RestApi: 
+    SOAP is a protocol with strict standards, using XML for messages.
+
+
+#### Django pytests-django, pytest-cov, Factory Boy, pytest-xdist  #####
+pytest-xdist 
+    is a pytest plugin that allows you to run tests in parallel across multiple CPUs or hosts. 
+
+## Testy (api performance testing) ###
+JMeter
+    download zip and run: jmeter.bat (GUI)
+    jmeter -n -t path/to/testplan.jmx -l results.jtl
+    JMeter is best for API and load testing, not for full browser-based 
+    UI automation. For UI tests, use Selenium, Cypress, Playwright, or similar tools.
+
+
+#### Browser(Chrome) debug ######
+
+Open Chrome DevTools (F12) → Network:
+
+Check “Preserve log” and uncheck “Disable cache” only if you want caching off; keep the Network panel open before triggering the request.
+Filter by Fetch/XHR to focus on API calls; optionally type part of the endpoint in the filter box.
+Trigger the action; select the request to see:
+Headers tab → URL, status, request/response headers, query params, payload.
+Response tab → response body (formatted if JSON).
+Preview tab → rendered JSON tree.
+Right-click the request → “Copy” → “Copy as cURL” to replay in terminal/postman.
+Use “Initiator” column/tab to see which script triggered it and stack trace.
+To watch JSON live in Console: on a finished request’s Response tab, click “View source” or copy the URL and run await fetch('<url>').then(r => r.json()) in Console.
+For timing: check Waterfall or Timing tab to see DNS/connect/TTFB/download phases.
+If CORS/caching issues: toggle “Disable cache” while DevTools is open, or use “Blocked Requests” details.
+
+
+#### Test types #########
+In professional systems, it’s best to have a comprehensive testing strategy. 
+In addition to API, UI, and performance tests, consider adding:
+
+Unit Tests
+Test individual functions or classes in isolation for correctness.
+
+Integration Tests
+Verify that different modules or services work together as expected.
+
+End-to-End (E2E) Tests
+Simulate real user scenarios across the entire system.
+
+Security Tests
+Check for vulnerabilities (e.g., authentication, authorization, input validation).
+
+Load/Stress/Soak Tests
+Assess system behavior under heavy or prolonged load.
+
+Regression Tests
+Ensure new changes don’t break existing functionality.
+
+Usability/Accessibility Tests
+Validate user experience and accessibility compliance.
+
+Smoke Tests
+Quick checks to ensure basic functionality works after deployment.
+
+Backup/Recovery & Disaster Recovery Tests
+Ensure data can be restored and the system recovers from failures.
+
+Compliance Tests
+Verify adherence to legal, regulatory, or industry standards.
+
+
+
+########  Build a Complete QA Architecture ############
+In a standard web application architecture, these tools map directly to different stages of
+ the development and testing lifecycle:
+
+1. Contract Phase (Swagger / OpenAPI): Developers define REST API endpoints, schemas, and status codes.
+QA uses this spec to know exactly what requests to send and responses to validate.
+
+2. Behavior & Specification Phase (Cucumber or Robot Framework): Business analysts and QA write high-level 
+human-readable scenarios describing expected features (e.g., user login, checkout process).
+
+3. Execution Phase (Pytest / Test Runners): Pytest executes backend Python API test suites 
+    against the REST endpoints defined in Swagger.
+
+4. Selenium gets called inside Pytest, Cucumber, or Robot Framework scripts to open 
+    a browser, click buttons, and verify DOM elements on the web frontend.
+
+
+########### Recommended Career  ########
+1. Keep Pytest as your core strength: Polish recruiters looking for Software Development Engineers in Test (SDETs)
+ prioritize pure Python coding skills, clean POM design, CI/CD integration (GitLab, Jenkins), and Docker.
+
+2. Learn Playwright alongside Pytest: If you want to increase your market value in Poland right now, Playwright (Python) 
+is gaining massive traction as a modern alternative to Selenium.
+
+3. Add Robot Framework as a secondary skill: Spend a few days learning Robot Framework basics. Because you already know Python and Selenium,
+picking up Robot Framework keywords takes very little effort and lets you check that box on job applications.
+

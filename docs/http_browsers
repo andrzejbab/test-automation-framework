@@ -1,0 +1,92 @@
+HTTP (HyperText Transfer Protocol) 
+    is the foundational protocol used for communication between clients (like browsers or apps) and servers on the web.
+    It defines how requests for resources (like web pages or APIs) are made and how servers respond.
+
+    1. HTTP request
+        is sent by a client to a server, 
+        Method: The action to perform (e.g., GET to retrieve data, POST to send data, PUT to update, DELETE to remove).
+        URL: The address of the resource (e.g., /api/user/1).
+        Headers(Metadata):
+        Body: Data sent with the request (mainly for POST, PUT, PATCH).
+            In a request, the body might include form data, JSON, XML, or file uploads.
+
+    2. HTTP response is what the server sends back. 
+        Headers
+        Body (like HTML, JSON, or files).
+        Status code:
+            200 OK: Request succeeded, response contains requested data.
+            201 Created: Resource successfully created (often after POST).
+            204 No Content: Request succeeded, no content to return.
+            400 Bad Request: Client sent invalid request.
+            401 Unauthorized: Authentication required or failed.
+            403 Forbidden: Client is authenticated but not allowed access.
+            404 Not Found: Requested resource does not exist.
+            405 Method Not Allowed: HTTP method not supported for this resource.
+            500 Internal Server Error: Server encountered an error.
+            502 Bad Gateway: Server received invalid response from upstream.
+            503 Service Unavailable: Server is temporarily unable to handle the request.
+
+    In testing (as in your pytest notes), HTTP responses are often mocked to simulate server replies,
+    allowing you to test how your code handles different scenarios (success, errors, etc.) without making real network calls.
+
+
+##### Headers(Metadata): #######
+    help control how requests and responses are handled and interpreted:
+            Content-Type: Specifies the media type of the resource (e.g., application/json, text/html).
+            Authorization: Contains credentials for authenticating the client (e.g., Bearer token).
+            Accept: Tells the server which content types the client can process (e.g., application/json).
+            User-Agent: Identifies the client software making the request (e.g., browser type).
+            Cookie: Sends stored cookies from the client to the server.
+            Set-Cookie: Used by the server to send cookies to the client.
+            Cache-Control: Directs caching behavior (e.g., no-cache, max-age).
+            Access-Control-Allow-Origin: Used in CORS to specify allowed origins.
+
+##### Body(Payload): #########
+    The HTTP body is the part of an HTTP request or response that contains the actual data being sent.
+    It is used mainly with methods like POST, PUT, or PATCH (for requests) and in 
+    responses that return data (like JSON, HTML, files):
+        In a request, the body might include form data, JSON, XML, or file uploads.
+        In a response, the body contains the resource or data requested (e.g., a web page, JSON object).
+
+#### How to send data  #####
+    Data is sent over the URL (as path parameters or query strings) 
+    or in the payload (body) based on conventions and HTTP method rules:
+
+    URL (Path/Query):
+        Used for identifying resources (e.g., /api/user/123 for user with ID 123).
+        Used for filtering, searching, or specifying options (e.g., ?sort=asc&limit=10).
+        GET requests should only send data in the URL, not in the body.
+    Payload (Body):
+        Used for sending new or updated data (e.g., POST or PUT with JSON body).
+        Used when the data is complex, large, or sensitive (not suitable for URL).
+        POST, PUT, PATCH, and DELETE can send data in the body.
+    Rules of thumb:
+        Use the URL for resource identification and simple parameters.
+        Use the body for creating, updating, or sending complex data.
+        Never send sensitive data (like passwords) in the URL, as URLs can be logged or cached.
+
+
+
+CORS (Cross-Origin Resource Sharing) 
+    is a security feature in web browsers that controls how web pages can make requests to
+     a domain different from the one that served the web page. By default, browsers block requests for resources (like APIs) from 
+     different origins (domains, protocols, or ports) for security reasons. CORS allows servers to specify who can access their resources
+      by sending special HTTP headers (like Access-Control-Allow-Origin).
+    If the server allows the origin, the browser lets the request proceed. If not, the browser blocks the response. 
+    This protects users from malicious sites trying to access sensitive data from other sites.
+
+
+#### Cache, Cookies #########
+1. Browser Cache (The Speed Booster)
+    -> What it stores: Static files like images, logos, CSS files (which dictate fonts and colors), and JavaScript files.
+
+    -> The primary goal: To make websites load significantly faster and reduce the amount of data you have to download over your network.
+
+    -> Real-world example: When you visit a news site, your browser downloads the site's logo into the cache. If you click on an article, the browser pulls the logo from your local hard drive instead of downloading it from the internet again, making the page snap into view instantly.
+
+2. Browser Cookies (The Memory Tracker)
+    -> What it stores: Small pieces of text data, such as a unique session ID, user preferences, or tracking codes.
+
+    -> The primary goal: To maintain user sessions, remember settings, and track behavior across the web.
+
+    -> Real-world example: When you log into an online store, the server puts a cookie on your browser with a unique ID. As you browse different pages, the site checks that cookie so it knows to keep you logged in and remembers what you put in your shopping cart.

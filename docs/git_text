@@ -1,0 +1,43 @@
+######### Git ############
+stage(prepare to commit):
+    git add file
+    git add .
+unstage()
+    git reset file
+    git reset
+
+## Commit ##
+ Here is the core difference between using -m and -a (especially when you combine them with commit):
+
+    -m (Message): This simply tells Git, "Here is the comment/message for my commit." It does not stage your files for you. If you run git commit -m "fix something", Git will fail and tell you there are no staged files (unless you already staged them manually or clicked the + icon).
+
+    -a (All/Auto-stage): This tells Git, "Automatically stage every file that is currently tracked and modified, and then commit it."
+
+    How they work together vs. apart:
+    git commit -m "message"
+
+    Requires manual staging first (you must run git add or click + in VS Code).
+
+    It only commits the files you specifically chose to stage.
+
+    git commit -am "message" (Combining both)
+
+    Skips staging entirely for existing files.
+
+    It automatically stages all modified tracked files and commits them instantly with that message.
+
+    Reminder: It still will not automatically include brand-new untracked files (like new files marked with a U).
+
+    In short: -m defines what you say about the commit, while -a defines what files get swept into the commit automatically.
+
+######## fetch , pull ##########
+
+1. git fetch (The Safe Check)
+What it does: It connects to the remote server (like GitHub) and downloads all the latest branch updates, commit history, and new branches into your local repository.
+
+What it changes: Nothing on your working screen. Your local code stays completely untouched.
+
+Why use it: It lets you safely see if anyone else has made changes to the project without risking overwriting or breaking the code you are currently working on.
+
+2. git pull (Fetch + Merge)
+What it does: git pull is actually a two-in-one command. It runs git fetch first to download the changes, and then immediately tries to merge those changes into the code you are currently looking at on your screen.

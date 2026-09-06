@@ -1,0 +1,71 @@
+## OpenAPI-based API Testing vs Manual Testing in Klubster
+
+### 1. OpenAPI
+    OpenAPI (formerly known as Swagger) is a specification language for describing REST APIs.
+
+    What it is: A standard, machine-readable format (written in YAML or JSON) that outlines how your API looks. It acts as a contract between developers, clients, and servers.
+
+    What it contains: A description of your endpoints (e.g., /api/users/), HTTP methods (GET, POST), required parameters, expected headers, request body structures, and response schemas.
+
+    What it does on its own: Nothing. It is a static text document. It cannot execute code or test a server by itself; it just describes how the API should work.
+
+### 2. Schemathesis
+Schemathesis is an automated API testing tool.
+
+What it is: A Python library and CLI tool designed to read an OpenAPI (or GraphQL) specification file and automatically generate and execute tests against a running API server.
+
+What it does: It reads your OpenAPI blueprint, figures out all the valid and invalid inputs required for your endpoints, sends thousands of test requests (including fuzz data and edge cases), and checks if the server crashes, throws unexpected errors, or violates the schema rules.
+
+### OpenAPI-based Testing
+- Tests are generated or validated automatically based on the API definition (OpenAPI spec).
+- Ensures all endpoints, parameters, and responses conform to the documented contract.
+- Tools like Schemathesis or pytest-openapi can auto-discover edge cases and schema violations.
+- Reduces manual test writing and helps catch undocumented or breaking changes.
+
+### Manual API Testing (as in Klubster)
+- Tests are written by hand, usually using pytest and requests or Django test client.
+- You control exactly what is tested, but coverage depends on what you write.
+- No automatic validation against a formal API contract—mistakes or undocumented changes may go unnoticed.
+- More flexible for custom logic, but more effort to maintain and less standardized.
+
+**Summary:**
+OpenAPI-based testing is more automated and contract-driven, while manual tests offer flexibility but require more effort and discipline to ensure coverage and correctness.
+
+### Generate OpenAPI Spec from Django ###
+drf-spectacular or drf-yasg
+1. Install drf-spectacular: pip install drf-spectacular
+2. Add 'drf_spectacular' to INSTALLED_APPS in settings.py.
+3. Configure the schema view in urls.py:
+    ```python
+    from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+    urlpatterns = [
+        # ... your other URL patterns ...
+        path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+        path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    ]
+    ```
+4. Access the OpenAPI spec at http://localhost:8000/api/schema/ and the interactive docs at http://localhost:8000/api/docs/.
+5. Customize the schema generation with drf-spectacular settings as needed (e.g., title, version, etc.).
+6. Ensure your API views and serializers are properly annotated to generate accurate schema (e.g., using @extend_schema).
+    To ensure your OpenAPI specification is well prepared for automatic testing:
+
+    Document all endpoints, methods, parameters, request bodies, and responses in detail.
+    Specify request/response schemas with accurate types, required fields, and constraints (e.g., minLength, pattern).
+    Include examples for requests and responses.
+    Use clear descriptions for endpoints, parameters, and models.
+    Define authentication/authorization requirements in the spec.
+    Annotate error responses and edge cases.
+    Keep the spec up to date with your codebase.
+    Use tools like drf-spectacular’s @extend_schema to add missing details or override defaults.
+
+
+### Generate openapi client #####
+1. OpenAPI spec used: [tests/openapi/schema.yaml](tests/openapi/schema.yaml)
+2. Output folder: [tests/openapi/openapi_client](tests/openapi/openapi_client)
+3. Install the generator (in the backend venv):
+    C:/D/Klubster/backend/venv/Scripts/python.exe -m pip install openapi-python-client
+4. Generate the Python client (overwrite enabled):
+    C:/D/Klubster/backend/venv/Scripts/python.exe -m openapi_python_client generate --path schema.yaml --output-path openapi_client --overwrite
+    Note: generation completed with a warning that `ruff` is not in PATH (optional formatter only).
+

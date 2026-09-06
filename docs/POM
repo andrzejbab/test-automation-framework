@@ -1,0 +1,33 @@
+## POM - PageObjectModel ##
+-> The primary goal of the Page Object Model (POM) is to hide the heavy lifting of WebDriver and expose only the intent of the user.
+
+-> Tests should express bissnes behavior; Page Objects should express mechanics.
+
+-> The test should not know how the site works. The Page Objects should know the site's UI structure, locators, actions, and navigation.
+
+-> URLs and site-specific navigation logic should usually live outside the test, in your POM/page layer.
+
+1. Hide driver.get() inside the Page Object
+Your test shouldn't be responsible for navigating the driver. The LoginPage should know how to open itself.
+
+Standard: Create an open() or load() method inside your LoginPage class.
+
+2. Group Actions into High-Level Business Flows
+Instead of calling enter_username, enter_password, and click_login individually in every test, group them into a single method inside the POM.
+
+Standard: Create a login(username, password) method on the LoginPage.
+
+3. Return the Next Page Object (Fluent Interface)
+When a user clicks "login", the application transitions to a new page. Your POM should mirror this by returning the Page Object of the page you land on.
+
+Standard: click_login() (or your grouped login() method) should return a ClubManagementPage or UserSettingsDropdown object upon success, or return self (the LoginPage) if the login fails.
+
+4. Hide "Waits" Inside the Page Object
+Your test file has login_page.wait_for_url_contain(...). Tests should ideally contain no wait logic.
+
+Standard: The synchronization (waiting for the URL to change) should happen automatically inside the login() or logout_click() methods before returning the next page object.
+
+5. Remove Hardcoded Strings & Redundant Assertions
+assert ... is True is unpythonic. Use assert ....
+
+Hardcoded strings like "Nieprawidłowy login lub hasło." should be stored as constants in the LoginPage class or a localization file, so if the Polish translation changes, you only update it in one place.

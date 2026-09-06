@@ -1,0 +1,62 @@
+ls -l
+check where is account assigned
+    id 
+check user groups:
+    groups
+
+drwxrwxr-x 7 andrzej andrzej 4096 Dec 13 10:18 . means:
+
+drwxrwxr-x: Permissions (
+    d = directory,
+    rwx = read/write/execute for owner, 
+    rwx for group,
+    r-x for others)
+7: Number of hard links (usually not important for most users)
+andrzej: Owner of the directory
+andrzej: Group owner
+4096: Size in bytes (for directories, usually 4096)
+Dec 13 10:18: Last modification date and time
+. : The directory itself (the current directory)
+
+
+PostgreSQL: How to log in and see tables on Ubuntu
+
+1. Open a terminal on your Ubuntu server.
+2. Log in to PostgreSQL as the postgres user:
+    sudo -u postgres psql
+    # Or, for a specific user/database:
+    psql -U your_db_user -d your_db_name
+3. List all databases:
+    \l
+4. Connect to your database:
+    \c your_db_name
+5. List all tables:
+    \dt
+6. To see the structure of a table:
+    \d table_name
+7. Exit psql:
+    \q
+
+Remove dir:
+rm -r <directory_name>
+
+Change to home dir:
+cd ~/
+
+See all file:
+ls -la
+
+Problem with gnome-keyring:
+    sudo apt update
+    sudo apt install gnome-keyring libsecret-1-0 libsecret-tools seahorse
+Log out and log back in (PAM will start the keyring), or start it for the current user:
+    systemctl --user start gnome-keyring-daemon.service
+Verify:
+    pgrep -a gnome-keyring
+    systemctl --user status gnome-keyring-daemon.service
+
+System info:
+    uname -m
+
+Check for installed package:
+    dpkg -l | grep devicetrust

@@ -1,0 +1,132 @@
+
+### Cluster ###
+    Cluster: a Kubernetes installation (control plane + one or more worker nodes) that schedules
+    and runs your Pods/containers. In k3s you get a lightweight single-node cluster by default, 
+    but it’s still the full Kubernetes API and controllers managing desired state.
+
+## PVC ###
+    PVC (PersistentVolumeClaim): a request for persistent storage. You define size/access mode in the claim; 
+    Kubernetes binds it to a PersistentVolume (or dynamic provisioner) and mounts it into Pods. In your setup,
+    the Postgres manifest uses a PVC for database data, and the media PVC is for uploaded files so they
+    persist across pod restarts/rollouts.
+
+## PODS ##
+    Pods are Kubernetes’ smallest deployable units. A Pod groups one or more tightly coupled containers that share:
+    Network namespace (same IP/ports inside the Pod)
+    Volumes (shared storage mounts)
+    Lifecycle (scheduled, restarted together)
+    In your manifests, each Deployment (backend, frontend, postgres) creates Pods that run the container 
+    image you specify. Pods are ephemeral—if they restart, their container filesystems reset—so anything
+    that must persist (DB data, media uploads) should live on a PVC mounted into the Pod.
+
+## Kubernetes manifests
+    are YAML/JSON files that declare the desired state of resources
+    (Deployments, Services, Ingresses, Secrets, ConfigMaps, PVCs, etc.).
+    They specify which images to run, how many replicas, ports, environment variables,
+    volumes, and how traffic should flow.
+
+    Applying manifests to k3s (a lightweight Kubernetes distro) tells its API server the desired state.
+    k3s then pulls the referenced container images, schedules Pods, creates Services/Ingresses, mounts volumes,
+    and keeps things reconciled to match what the manifest describes.
+
+    Kubernetes manifests (Deployment, Service, Ingress, Secret, PVC, etc.)
+
+    Here’s what each manifest in the k8s folder does:
+        1. Namespace: namespace.yaml — Creates the klubster namespace to isolate all app resources.
+        2. Backend env secret template: secret-backend-example.yaml — Stores sensitive settings 
+            (Django secret key, DB creds, SMTP). Copy to secret-backend.yaml and fill real values before applying.
+        3. Frontend config: configmap-frontend.yaml — Non-secret env for the React app (API host, frontend host).
+        4. Postgres (optional): postgres.yaml — PVC for data + Deployment + Service for PostgreSQL if you run DB in-cluster.
+        5. Media volume: media-pvc.yaml — PersistentVolumeClaim for uploaded media, mounted by the backend.
+        6. Backend workload: backend.yaml — Deployment for the Django backend (Gunicorn), mounts media PVC,
+            pulls env from the secret; Service exposes it on port 8000.
+        7. Frontend workload: frontend.yaml — Deployment for the React/Nginx frontend; Service exposes it on port 80.
+        8. Ingress: ingress.yaml — Routes external HTTP(S) to frontend (/) and backend (/api) for hosts
+            klubster.pl/www.klubster.pl, using the Traefik ingress class (k3s default).
+
+## K3s 
+    k3s is a lightweight Kubernetes distribution, but it still implements the 
+    same Kubernetes API. That means the standard Kubernetes manifests (YAML/JSON)
+    work unchanged on k3s—no special “k3s manifests” are needed. You write normal k8s 
+    manifests (Deployment, Service, Ingress, Secret, PVC, etc.), and k3s applies
+    them through its API server and controllers, just like any other Kubernetes cluster.
+
+
+### Ingress ###
+    Ingress is a Kubernetes resource that routes external HTTP/HTTPS traffic into
+    your cluster. It defines hostnames and URL paths (e.g., example.com, /api)
+    and maps them to internal Services/Pods. With an Ingress controller 
+    (Traefik, nginx, etc.), it also handles TLS termination, virtual hosts, and
+    path-based routing so you don’t need to expose every Service on its own port.
+    Ingress = the set of rules (Kubernetes object) for routing traffic.
+
+### Traefic ### 
+    is a software load balancer and reverse proxy that can route HTTP/HTTPS
+    traffic to your services. In Kubernetes, Traefik can act as an Ingress controller.
+    Traefik = a program that implements those rules (an Ingress controller),
+    actually handling and forwarding the traffic.
+    So, Traefik reads your Ingress resources and makes the routing happen.
+
+## GitHub Container Registry (ghcr) ###
+    GitHub Container Registry (ghcr) is a service provided by GitHub for storing 
+    and sharing container images (like Docker images). It lets you push, pull, 
+    and manage images directly from your GitHub account or organization.
+
+Both are popular, but they’re used in different patterns:
+
+cert-manager is the most common, cluster-wide certificate manager on Kubernetes (works with any ingress controller). It’s the default choice on many clusters when teams want centralized, flexible ACME/PKI.
+Traefik ACME is often used when you’re already running Traefik (like k3s default) and want a simple, controller-integrated Let’s Encrypt flow without extra components.
+In short: cert-manager is more widely used across Kubernetes, but Traefik ACME is very common in k3s/Traefik setups for its simplicity.
+
+In Kubernetes the cert/key aren’t stored at 
+fixed file paths like /etc/letsencrypt/... in your legacy Nginx.
+Instead:
+
+### cert-manager (or Traefik ACME)
+    creates a Kubernetes TLS Secret (in your case klubster-tls in namespace klubster).
+    The Ingress controller (Traefik) mounts that Secret into its own Pod and serves TLS from there. 
+    The files live inside the controller Pod, not on your node’s filesystem,
+    so you don’t manage /etc/letsencrypt/... paths yourself.
+    You reference the Secret in the Ingress tls section; the controller handles the rest.
+    If you shell into the Traefik Pod, you’d see the cert/key mounted under an internal path,
+    but you normally never need to touch it.
+
+### Deploy #####
+    The Kubernetes cluster is the environment where your 
+    application will be deployed and run. It can be hosted on
+    a cloud provider (like Google Kubernetes Engine, Azure AKS, AWS EKS), 
+    on-premises, or on a VPS.
+
+    To use it with GitHub Actions:
+
+    Download your kubeconfig file from your Kubernetes provider or admin.
+    Base64-encode the file’s contents.
+    Add the encoded string as a GitHub secret named KUBECONFIG in your
+     repository.
+    If you don’t have a cluster yet, you’ll need to create one with your
+    preferred provider, then obtain the kubeconfig from their dashboard or
+    CLI. Let me know if you need help with a specific provider or setting up a cluster!
+
+### Kubernetes Providers: Types and Differences ###
+Kubernetes providers are services or platforms that host and manage Kubernetes clusters for you. Here are the main types and their differences:
+
+1. Cloud Providers:
+    - Google Kubernetes Engine (GKE): Managed by Google Cloud, easy integration with Google services.
+    - Azure Kubernetes Service (AKS): Managed by Microsoft Azure, integrates with Azure tools.
+    - Amazon Elastic Kubernetes Service (EKS): Managed by AWS, integrates with AWS services.
+    - Pros: Easy setup, automatic scaling, security, and maintenance.
+    - Cons: Monthly costs, tied to cloud ecosystem.
+
+2. On-Premises:
+    - You install and manage Kubernetes on your own servers or virtual machines.
+    - Pros: Full control, no cloud dependency, can use existing hardware.
+    - Cons: Complex setup, you handle all maintenance and scaling.
+
+3. VPS/Custom Hosting:
+    - Install Kubernetes on a rented virtual private server (VPS) or bare metal.
+    - Pros: Flexible, can be cheaper for small setups.
+    - Cons: Manual setup, less automation, you manage security and updates.
+
+Cloud providers are easiest for most users, while on-premises and VPS 
+give more control but require more work.
+Your choice depends on your needs, budget, and technical skills.

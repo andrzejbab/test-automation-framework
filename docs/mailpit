@@ -1,0 +1,25 @@
+Fastest way forward for your email testing is to run Mailpit without Docker.
+
+Run this on the VPS:
+
+Download Mailpit binary
+curl -L -o mailpit.tar.gz https://github.com/axllent/mailpit/releases/latest/download/mailpit-linux-amd64.tar.gz
+
+Extract
+tar -xzf mailpit.tar.gz
+
+Start Mailpit(Linux)
+./mailpit
+
+Start Mailpit(Windows)
+mailpit.exe
+
+Mailpit will listen on:
+SMTP: 127.0.0.1:1025
+Web UI: http://127.0.0.1:8025
+
+
+Later in production : 
+  Anymail: production-style sending via provider API, good for delivery/testing events.
+  Use Anymail later when you want provider API integration and delivery features
+  
