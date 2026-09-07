@@ -1,0 +1,105 @@
+name: CI (Test)
+
+on:
+  push:
+    #branches: [ "main" ]
+  pull_request:
+    #branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    environment:
+      name: Test
+    env:
+      # Pass secrets directly to Docker Compose and tests
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      REACT_APP_API_HOST: ${{ vars.REACT_APP_API_HOST }}
+      REACT_APP_FRONTEND_HOST: ${{ vars.REACT_APP_FRONTEND_HOST }} 
+      
+      # Test required environment variables
+      TEST_API_ADMIN_USERNAME: ${{ secrets.TEST_API_ADMIN_USERNAME }}
+      TEST_API_ADMIN_EMAIL: ${{ secrets.TEST_API_ADMIN_EMAIL }}
+      TEST_API_ADMIN_PASSWORD: ${{ secrets.TEST_API_ADMIN_PASSWORD }}
+      TEST_API_BASE_URL: ${{ vars.TEST_API_BASE_URL }}
+      TEST_UI_BASE_URL: ${{ vars.TEST_UI_BASE_URL }}
+      MAILPIT_HOST: ${{ vars.MAILPIT_HOST }}
+      UI_BROWSER: ${{ vars.UI_BROWSER }}
+      UI_HEADLESS: ${{ vars.UI_HEADLESS }}
+
+    steps:
+      - name: Checkout test repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Start Environment (Backend, Frontend, Mailpit)
+        run: docker compose up -d
+
+      - name: Wait for Mailpit to be ready
+        run: |
+          timeout 30 bash -c 'until curl -s http://localhost:8025/api/v1/info > /dev/null; do sleep 1; done'
+          echo "Mailpit is ready!"
+
+      - name: Wait for Backend to be ready
+        run: |
+          timeout 60 bash -c 'until curl -s "$TEST_API_BASE_URL" > /dev/null; do sleep 2; done'
+          echo "Backend is ready!"
+
+      - name: Wait for Frontend to be ready
+        run: |
+          timeout 60 bash -c 'until curl -s "$TEST_UI_BASE_URL" > /dev/null; do sleep 2; done'
+          echo "Frontend is ready!"
+
+      # Setup backend database inside the running container
+      - name: Migrate DB
+        run: docker compose exec -T backend python manage.py migrate --noinput
+
+      - name: Create Admin User
+        env:
+          DJANGO_SUPERUSER_USERNAME: ${{ env.TEST_API_ADMIN_USERNAME }}
+          DJANGO_SUPERUSER_EMAIL: ${{ env.TEST_API_ADMIN_EMAIL }}
+          DJANGO_SUPERUSER_PASSWORD: ${{ env.TEST_API_ADMIN_PASSWORD }}
+        run: docker compose exec -T backend python manage.py createsuperuser --noinput
+
+      # Set up test environment
+      - name: Set up Python for Tests
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Test Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Ensure this requirements.txt only contains test libs (pytest, selenium, schemathesis)
+          pip install -r requirements.txt 
+
+      # Execute Tests
+      - name: Run all tests (API and UI)
+        continue-on-error: true
+        run: pytest -m "api or ui"
+
+      # Reporting
+      - name: Generate Allure HTML Report
+        if: always()
+        run: |
+          npm install -g allure-commandline
+          allure generate tests/allure-results -o allure-report --clean
+
+      - name: Upload Allure Report as Artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-html-report
+          path: allure-report/
+          retention-days: 14
+
+      # Teardown to clean up runners
+      - name: Stop containers
+        if: always()
+        run: docker compose down
