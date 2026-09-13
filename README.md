@@ -37,16 +37,13 @@ Before you begin, ensure you have the following installed:
 Create a .env file in the root directory and add the following configurations:
 
 #Frontend
-REACT_APP_API_HOST=https://fluffy-potato-v67j9r6g9w4x3x7j6-8000.app.github.dev
-REACT_APP_FRONTEND_HOST=https://fluffy-potato-v67j9r6g9w4x3x7j6-3000.app.github.dev
-
+REACT_APP_API_HOST=[target url]:8000
+REACT_APP_FRONTEND_HOST=[target url]:3000
 #Backend
 SECRET_KEY=@9r-o=5(%2#b=y3fht1ndf1tc*!1(bfwyc8h-nb8s)ob+v741+
-BACKEND_HOST=https://fluffy-potato-v67j9r6g9w4x3x7j6-8000.app.github.dev
-FRONTEND_HOST=https://fluffy-potato-v67j9r6g9w4x3x7j6-3000.app.github.dev
-ALLOWED_HOSTS=fluffy-potato-v67j9r6g9w4x3x7j6-8000.app.github.dev,localhost,127.0.0.1
-
-#Set admin for django db
+BACKEND_HOST=[target url]:8000
+FRONTEND_HOST=[target url]:3000
+ALLOWED_HOSTS=[target url],localhost,127.0.0.1
 DJANGO_ADMIN_USER=admin
 DJANGO_ADMIN_EMAIL=admin@local.local
 DJANGO_ADMIN_PASSWORD=1234567
@@ -64,7 +61,14 @@ UI_HEADLESS=true
 ### 2. Start the Target Application
 Pull and spin up the required services for the test environment:
 
-docker compose -f docker-compose-pull.yml pull
+#Pull images
+#Login to GHCR ('repo', 'read:org', read:packages)
+To pull target images from a private repository, use a token for a single bash session:
+  export GITHUB_TOKEN="token_here"
+  echo $GITHUB_TOKEN | docker login ghcr.io -u github_username --password-stdin
+  docker compose -f docker-compose-pull.yml pull
+
+#Start images
 docker compose -f docker-compose-pull.yml up -d
 
 
@@ -81,13 +85,11 @@ Verify installation: python -m pytest --version
 
 ### 4. Install Browsers (Ubuntu/Linux)
 UI tests require a browser to be installed. Run the following to install Chromium and Google Chrome:
-
-sudo apt-get update
-sudo apt-get install -y chromium chromium-driver
-
-wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-google-chrome --version
+  sudo apt-get update
+  sudo apt-get install -y chromium chromium-driver
+  wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+  sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
+  google-chrome --version
 
 ---
 
@@ -96,13 +98,13 @@ google-chrome --version
 By default, UI tests run in headless mode. Make sure your virtual environment is activated.
 
 * Run all tests:
-  pytest tests/
+  pytest -m "api or ui"
 
 * Run API tests only:
-  pytest tests/api
+  pytest -m "api"
 
 * Run UI tests only:
-  pytest tests/ui
+  pytest -m "ui"
 
 ---
 
@@ -113,7 +115,7 @@ Test results are saved in tests/allure-results. To view them, install the Allure
 npm install -g allure-commandline
 
 
-Viewing locally:
+Viewing locally(local machine):
 allure serve tests/allure-results
 
 
