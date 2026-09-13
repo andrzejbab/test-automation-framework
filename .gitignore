@@ -12,3 +12,5 @@ results.jtl
 __init__.py
 sandbox.py
 allure-results/
+allure-report/
+*.deb
