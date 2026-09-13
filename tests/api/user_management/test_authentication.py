@@ -1,7 +1,7 @@
 import pytest
 import allure
-from tests.api.pydantic_models import ApiUserManagementTokenPostResponse, ApiUserManagementTokenPostResponse1, TokenRefresh
-from tests.utility.assertions import assert_response
+from api.pydantic_models import ApiUserManagementTokenPostResponse, ApiUserManagementTokenPostResponse1, TokenRefresh
+from utility.assertions import assert_response
 
 @allure.epic("User Management API")
 @allure.feature("Authentication")

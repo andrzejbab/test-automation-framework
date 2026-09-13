@@ -1,5 +1,5 @@
 import pytest
-from tests.utility.utility import load_env_files
+from utility.utility import load_env_files
 # Fixtures are loaded at top-level via tests/conftest.py
 
 # Pytest hook to add CLI options

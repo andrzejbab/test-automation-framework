@@ -13,7 +13,7 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from webdriver_manager.chrome import ChromeDriverManager
 from webdriver_manager.firefox import GeckoDriverManager
 
-from tests.api.api_clients.api_client_base import ApiClient
+from api.api_clients.api_client_base import ApiClient
 
 def get_url_ui(url_fragment: str):
     ui_base_url = os.getenv("TEST_UI_BASE_URL")

@@ -1,18 +1,11 @@
 selenium
 pytest
-pytest-django
 pytest-cov  
 pytest-xdist
-django-environ
-debugpy
-psycopg2-binary
 requests_mock
 requests
 webdriver-manager
 schemathesis
-pytest_bdd
-openapi-python-client
-datamodel-code-generator
 pydantic[email]
 allure-pytest
     

@@ -1,4 +1,4 @@
-from tests.utility.assertions import assert_response
+from utility.assertions import assert_response
 import pytest
 import allure
 

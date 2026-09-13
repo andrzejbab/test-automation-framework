@@ -1,11 +1,11 @@
 import pytest
 from typing import Dict
-from tests.api.api_clients.api_client_auth_user import ApiClientAuthUser
-from tests.api.api_clients.api_client_auth_admin import ApiClientAuthAdmin 
-from tests.api.api_clients.api_client_base import ApiClient, MockApiClient
-from tests.utility.utility import get_option_env, fetch_and_validate_tokens
-from tests.utility.factories import make_user_data_abonament_basic
-from tests.utility.emails import get_activation_token_from_email_body, clear_emails_mailpit
+from api.api_clients.api_client_auth_user import ApiClientAuthUser
+from api.api_clients.api_client_auth_admin import ApiClientAuthAdmin 
+from api.api_clients.api_client_base import ApiClient, MockApiClient
+from utility.utility import get_option_env, fetch_and_validate_tokens
+from utility.factories import make_user_data_abonament_basic
+from utility.emails import get_activation_token_from_email_body, clear_emails_mailpit
 import os
 from django.contrib.auth import get_user_model
 

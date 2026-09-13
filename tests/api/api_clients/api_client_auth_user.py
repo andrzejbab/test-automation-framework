@@ -1,4 +1,4 @@
-from tests.api.api_clients.api_client_base import ApiClient
+from api.api_clients.api_client_base import ApiClient
 import requests
 from typing import Dict
 

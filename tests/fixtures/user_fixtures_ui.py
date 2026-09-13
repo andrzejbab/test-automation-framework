@@ -1,7 +1,7 @@
 import pytest
-from tests.utility.utility import get_option_env
-from tests.ui.pom.pages.user_management.login_page import LoginPage
-from tests.utility.utility import (get_browser, get_headless, build_chrome_driver,
+from utility.utility import get_option_env
+from ui.pom.pages.user_management.login_page import LoginPage
+from utility.utility import (get_browser, get_headless, build_chrome_driver,
                                      build_firefox_driver)
 
 
