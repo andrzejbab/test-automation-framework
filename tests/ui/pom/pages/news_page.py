@@ -1,7 +1,7 @@
-from tests.ui.pom.base.base_page import BasePage
-from tests.ui.pom.components.top_bar_component import UserSettingsDropdownComponent
-from tests.ui.pom.components.side_menu_component import ClubSideMenuComponent
-from tests.ui.pom.components.top_bar_component import TopBarComponent
+from ui.pom.base.base_page import BasePage
+from ui.pom.components.top_bar_component import UserSettingsDropdownComponent
+from ui.pom.components.side_menu_component import ClubSideMenuComponent
+from ui.pom.components.top_bar_component import TopBarComponent
 
 class NewsPage(BasePage):
     def __init__(self, driver):

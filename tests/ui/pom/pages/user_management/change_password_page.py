@@ -1,8 +1,8 @@
 import allure
-from tests.ui.pom.base.base_page import BasePage
+from ui.pom.base.base_page import BasePage
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from tests.ui.pom.pages.user_management.login_page import LoginPage
+from ui.pom.pages.user_management.login_page import LoginPage
 
 
 class ChangePasswordPage(BasePage):
@@ -42,5 +42,5 @@ class ChangePasswordPage(BasePage):
     @allure.step("Wait for redirect to login page")
     def wait_for_login_redirect(self):
         self.wait_until_element_to_be_clickable(self.login_button)
-        from tests.ui.pom.pages.user_management.login_page import LoginPage
+        from ui.pom.pages.user_management.login_page import LoginPage
         return LoginPage(self.driver)

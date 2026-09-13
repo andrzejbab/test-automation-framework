@@ -1,5 +1,5 @@
-from tests.ui.pom.base.base_page import BasePage
-from tests.ui.pom.components.user_settings_dropdown_component import UserSettingsDropdownComponent
+from ui.pom.base.base_page import BasePage
+from ui.pom.components.user_settings_dropdown_component import UserSettingsDropdownComponent
 from selenium.webdriver.common.by import By
 
 class TopBarComponent(BasePage):

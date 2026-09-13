@@ -1,7 +1,7 @@
-from tests.ui.pom.base.base_page import BasePage
+from ui.pom.base.base_page import BasePage
 from selenium.webdriver.common.by import By
 import allure
-from tests.utility.utility import get_url_ui
+from utility.utility import get_url_ui
 
 
 class LandingPage(BasePage):
@@ -27,17 +27,17 @@ class LandingPage(BasePage):
     @allure.step("Click login button")
     def click_login_in(self):
         self.wait_until_element_to_be_clickable(self.login_btn).click()
-        from tests.ui.pom.pages.user_management.login_page import LoginPage
+        from ui.pom.pages.user_management.login_page import LoginPage
         return LoginPage(self.driver)
     
     @allure.step("Select 'testowy' (Test) plan")
     def click_select_test_plan(self):
         self.wait_until_element_to_be_clickable(self.test_plan_btn).click()
-        from tests.ui.pom.pages.user_management.register_page import RegisterPage
+        from ui.pom.pages.user_management.register_page import RegisterPage
         return RegisterPage(self.driver)
     
     @allure.step("Select 'standardowy' (Standard) plan")
     def click_select_standard_plan(self):
         self.wait_until_element_to_be_clickable(self.standard_plan_btn).click()
-        from tests.ui.pom.pages.user_management.register_page import RegisterPage
+        from ui.pom.pages.user_management.register_page import RegisterPage
         return RegisterPage(self.driver)

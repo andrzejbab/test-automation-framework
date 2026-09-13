@@ -7,7 +7,6 @@ from utility.utility import get_option_env, fetch_and_validate_tokens
 from utility.factories import make_user_data_abonament_basic
 from utility.emails import get_activation_token_from_email_body, clear_emails_mailpit
 import os
-from django.contrib.auth import get_user_model
 
 @pytest.fixture(scope="session")
 def api_client(request, api_base_url):  # api_base_url from your existing fixture
@@ -91,25 +90,6 @@ def valid_credentials_admin(pytestconfig: pytest.Config) -> Dict[str, str]:
     }
 
 
-#@pytest.fixture(scope="session", autouse=True)
-@pytest.fixture(scope="session")
-def ensure_admin_user(django_db_setup, django_db_blocker):
-    """Ensure an admin user exists in the Django DB with env-provided credentials."""
-    username = os.getenv("TEST_API_ADMIN_USERNAME")
-    password = os.getenv("TEST_API_ADMIN_PASSWORD")
-    if not username or not password:
-        pytest.skip("admin credentials missing")
-    with django_db_blocker.unblock():
-        User = get_user_model()
-        user, created = User.objects.get_or_create(username=username, defaults={"is_staff": True, "is_superuser": True})
-        if created:
-            user.set_password(password)
-        else:
-            user.set_password(password)  # keep in sync with env in case password changed
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
-    return {"username": username, "password": password}
 
 
 

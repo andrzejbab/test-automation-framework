@@ -1,10 +1,10 @@
 import allure
 from selenium.webdriver.common.by import By
-from tests.ui.pom.base.base_page import BasePage    
-from tests.ui.constants import LOGIN_URL_FRAGMENT, CLUB_MANAGEMENT_URL_FRAGMENT
+from ui.pom.base.base_page import BasePage    
+from ui.constants import LOGIN_URL_FRAGMENT, CLUB_MANAGEMENT_URL_FRAGMENT
 from selenium.common.exceptions import TimeoutException
 
-from tests.utility.utility import get_url_ui
+from utility.utility import get_url_ui
 
 
 class LoginPage(BasePage):
@@ -46,7 +46,7 @@ class LoginPage(BasePage):
         self.wait_until_url_contain(text=CLUB_MANAGEMENT_URL_FRAGMENT)
         
         # Fixing circular import problem
-        from tests.ui.pom.pages.news_page import NewsPage
+        from ui.pom.pages.news_page import NewsPage
         return NewsPage(self.driver)
     
     @allure.step("Attempt login with invalid credentials for user: {username}")
@@ -71,7 +71,7 @@ class LoginPage(BasePage):
     @allure.step("Click 'Forgot Password' button")
     def click_forgot_password(self):
         self.wait_until_element_to_be_clickable(self.forgot_password_button).click()
-        from tests.ui.pom.pages.user_management.password_reset_page import PasswordResetPage
+        from ui.pom.pages.user_management.password_reset_page import PasswordResetPage
         return PasswordResetPage(self.driver)
     
     @allure.step("Enter username: {username}")

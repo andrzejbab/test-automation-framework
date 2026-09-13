@@ -2,8 +2,8 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import allure
-from tests.ui.pom.base.base_page import BasePage
-from tests.utility.emails import get_url_from_email_body
+from ui.pom.base.base_page import BasePage
+from utility.emails import get_url_from_email_body
 
 
 class PasswordResetPage(BasePage):
@@ -31,7 +31,7 @@ class PasswordResetPage(BasePage):
     @allure.step("Click back to login link")
     def click_back_to_login(self):
         self.wait_until_element_to_be_clickable(self.back_to_login_link).click()
-        from tests.ui.pom.pages.user_management.login_page import LoginPage
+        from ui.pom.pages.user_management.login_page import LoginPage
         return LoginPage(self.driver)
 
     @allure.step("Get password reset submit message")
@@ -42,6 +42,6 @@ class PasswordResetPage(BasePage):
     def click_password_reset_link_from_email(self, recipient):
         reset_url = get_url_from_email_body(recipient=recipient)
         self.driver.get(reset_url)
-        from tests.ui.pom.pages.user_management.change_password_page import ChangePasswordPage
+        from ui.pom.pages.user_management.change_password_page import ChangePasswordPage
         return ChangePasswordPage(self.driver)
 

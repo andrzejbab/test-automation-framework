@@ -1,6 +1,6 @@
 import pytest
-from tests.ui.pom.pages.user_management.landing_page import LandingPage
-from tests.ui.pom.pages.user_management.register_page import RegisterPage
+from ui.pom.pages.user_management.landing_page import LandingPage
+from ui.pom.pages.user_management.register_page import RegisterPage
 import allure
 
 

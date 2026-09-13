@@ -1,8 +1,8 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import allure
-from tests.ui.pom.base.base_page import BasePage
-from tests.utility.emails import get_url_from_email_body
+from ui.pom.base.base_page import BasePage
+from utility.emails import get_url_from_email_body
 
 
 class RegisterPage(BasePage):
@@ -98,6 +98,6 @@ class RegisterPage(BasePage):
     def activate_user(self, recipient):
         activation_url = get_url_from_email_body(recipient=recipient)
         self.driver.get(activation_url)
-        from tests.ui.pom.pages.user_management.login_page import LoginPage
+        from ui.pom.pages.user_management.login_page import LoginPage
         return LoginPage(self.driver)
 

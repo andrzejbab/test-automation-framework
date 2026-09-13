@@ -3,7 +3,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from ui.pom.base.base_page import BasePage
 from ui.pom.pages.user_management.login_page import LoginPage
-from tests.ui.pom.pages.user_management.change_password_page import ChangePasswordPage
+from ui.pom.pages.user_management.change_password_page import ChangePasswordPage
 
 class UserSettingsDropdownComponent(BasePage):
 

@@ -1,8 +1,8 @@
 import pytest
-from tests.ui.pom.pages.user_management.login_page import LoginPage
-from tests.ui.pom.pages.user_management.password_reset_page import PasswordResetPage
-from tests.ui.pom.pages.user_management.landing_page import LandingPage
-from tests.ui.pom.pages.news_page import NewsPage
+from ui.pom.pages.user_management.login_page import LoginPage
+from ui.pom.pages.user_management.password_reset_page import PasswordResetPage
+from ui.pom.pages.user_management.landing_page import LandingPage
+from ui.pom.pages.news_page import NewsPage
 import allure
 
 
