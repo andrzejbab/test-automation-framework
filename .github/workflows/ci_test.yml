@@ -1,36 +1,32 @@
-name: CI (Test)
+name: CI (Pull docker images - API/UI Tests)
 
 on:
   push:
-    #branches: [ "main" ]
   pull_request:
-    #branches: [ "main" ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     environment:
-      name: Test
-    env:
-      # Pass secrets directly to Docker Compose and tests
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-      REACT_APP_API_HOST: ${{ vars.REACT_APP_API_HOST }}
-      REACT_APP_FRONTEND_HOST: ${{ vars.REACT_APP_FRONTEND_HOST }} 
-      
-      # Test required environment variables
-      TEST_API_ADMIN_USERNAME: ${{ secrets.TEST_API_ADMIN_USERNAME }}
-      TEST_API_ADMIN_EMAIL: ${{ secrets.TEST_API_ADMIN_EMAIL }}
-      TEST_API_ADMIN_PASSWORD: ${{ secrets.TEST_API_ADMIN_PASSWORD }}
-      TEST_API_BASE_URL: ${{ vars.TEST_API_BASE_URL }}
-      TEST_UI_BASE_URL: ${{ vars.TEST_UI_BASE_URL }}
-      MAILPIT_HOST: ${{ vars.MAILPIT_HOST }}
-      UI_BROWSER: ${{ vars.UI_BROWSER }}
-      UI_HEADLESS: ${{ vars.UI_HEADLESS }}
-
+      name: Test_Framework
     steps:
-      - name: Checkout test repository
-        uses: actions/checkout@v4
+      # Checkout code
+      - uses: actions/checkout@v4
 
+      # Create .env file with all required variables
+      - name: Create .env file for Docker Compose
+        run: |
+          cat > .env << 'EOF'
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          BACKEND_HOST=http://localhost:8000
+          FRONTEND_HOST=http://localhost:3000
+          ALLOWED_HOSTS=localhost,127.0.0.1
+          DJANGO_ADMIN_USER=${{ secrets.DJANGO_ADMIN_USER }}
+          DJANGO_ADMIN_EMAIL=${{ secrets.DJANGO_ADMIN_EMAIL }}
+          DJANGO_ADMIN_PASSWORD=${{ secrets.DJANGO_ADMIN_PASSWORD }}
+          REACT_APP_FRONTEND_HOST=${{ vars.REACT_APP_FRONTEND_HOST}}
+          EOF
+      
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -38,55 +34,59 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GHCR_PAT }}
 
-      - name: Start Environment (Backend, Frontend, Mailpit)
-        run: docker compose up -d
+      # Build and start services using Docker Compose
+      - name: Pull and start Docker containers (Backend, Frontend, Mailpit)
+        run: |
+          docker compose -f docker-compose-pull.yml pull
+          docker compose -f docker-compose-pull.yml up -d
+
+      - name: Wait for Backend to be ready
+        run: |
+          echo "Waiting for backend at: $TEST_API_BASE_URL"
+          timeout 60 bash -c 'until curl -s "$TEST_API_BASE_URL" > /dev/null; do echo "Retrying..."; sleep 2; done' || (echo "Backend failed to start"; docker compose -f docker-compose-pull.yml logs backend; exit 1)
+        env:
+          TEST_API_BASE_URL: ${{ vars.TEST_API_BASE_URL}}
+
+      - name: Wait for Frontend to be ready
+        run: |
+          echo "Waiting for frontend at: $TEST_UI_BASE_URL"
+          timeout 60 bash -c 'until curl -s "$TEST_UI_BASE_URL" > /dev/null; do echo "Retrying..."; sleep 2; done' || (echo "Frontend failed to start"; docker compose -f docker-compose-pull.yml logs frontend; exit 1)
+        env:
+          TEST_UI_BASE_URL: ${{ vars.TEST_UI_BASE_URL}}
 
       - name: Wait for Mailpit to be ready
         run: |
           timeout 30 bash -c 'until curl -s http://localhost:8025/api/v1/info > /dev/null; do sleep 1; done'
           echo "Mailpit is ready!"
 
-      - name: Wait for Backend to be ready
-        run: |
-          timeout 60 bash -c 'until curl -s "$TEST_API_BASE_URL" > /dev/null; do sleep 2; done'
-          echo "Backend is ready!"
-
-      - name: Wait for Frontend to be ready
-        run: |
-          timeout 60 bash -c 'until curl -s "$TEST_UI_BASE_URL" > /dev/null; do sleep 2; done'
-          echo "Frontend is ready!"
-
-      # Setup backend database inside the running container
-      - name: Migrate DB
-        run: docker compose exec -T backend python manage.py migrate --noinput
-
-      - name: Create Admin User
-        env:
-          DJANGO_SUPERUSER_USERNAME: ${{ env.TEST_API_ADMIN_USERNAME }}
-          DJANGO_SUPERUSER_EMAIL: ${{ env.TEST_API_ADMIN_EMAIL }}
-          DJANGO_SUPERUSER_PASSWORD: ${{ env.TEST_API_ADMIN_PASSWORD }}
-        run: docker compose exec -T backend python manage.py createsuperuser --noinput
-
-      # Set up test environment
-      - name: Set up Python for Tests
+      # Install test dependencies
+      - name: Set up Python for testing
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: 'pip' 
 
-      - name: Install Test Dependencies
+      - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          # Ensure this requirements.txt only contains test libs (pytest, selenium, schemathesis)
-          pip install -r requirements.txt 
+          pip install -r tests/requirements.txt
 
-      # Execute Tests
+      # Tests
       - name: Run all tests (API and UI)
         continue-on-error: true
         run: pytest -m "api or ui"
+        env:
+          TEST_API_ADMIN_USERNAME: ${{ secrets.DJANGO_ADMIN_USER }}
+          TEST_API_ADMIN_PASSWORD: ${{ secrets.DJANGO_ADMIN_PASSWORD }}
+          TEST_API_BASE_URL: ${{ vars.TEST_API_BASE_URL}}
+          TEST_UI_BASE_URL: ${{ vars.TEST_UI_BASE_URL}}
+          MAILPIT_HOST: ${{ vars.MAILPIT_HOST}}
+          UI_BROWSER: ${{ vars.UI_BROWSER}}
+          UI_HEADLESS: ${{ vars.UI_HEADLESS}}
 
-      # Reporting
       - name: Generate Allure HTML Report
         if: always()
+        # Ensure 'allure-results' matches the directory set in your pytest.ini
         run: |
           npm install -g allure-commandline
           allure generate tests/allure-results -o allure-report --clean
@@ -97,9 +97,22 @@ jobs:
         with:
           name: allure-html-report
           path: allure-report/
-          retention-days: 14
+          retention-days: 14 # Keeps the report for 14 days to save storage
 
-      # Teardown to clean up runners
-      - name: Stop containers
-        if: always()
-        run: docker compose down
+      # Load(Performance) tests
+      # - name: Set up JMeter
+      #   run: |
+      #     wget https://downloads.apache.org//jmeter/binaries/apache-jmeter-5.6.3.tgz
+      #     tar -xzf apache-jmeter-5.6.3.tgz
+      #     echo "$GITHUB_WORKSPACE/apache-jmeter-5.6.3/bin" >> $GITHUB_PATH
+      # - name: Run JMeter Test
+      #   run: |
+      #     apache-jmeter-5.6.3/bin/jmeter -n -t tests/performance/user_management.jmx -l results.jtl -Jserver_name=localhost -Jport_nr=8000
+      # - name: Generate JMeter HTML Report
+      #   run: |
+      #     apache-jmeter-5.6.3/bin/jmeter -g results.jtl -o jmeter-report
+      # - name: Upload JMeter Report Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: jmeter-report
+      #     path: jmeter-report/
