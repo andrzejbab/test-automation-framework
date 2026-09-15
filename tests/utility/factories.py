@@ -1,4 +1,5 @@
 import uuid
+from ui.constants import DEFAULT_DISPLAY_VIEWPORT, DEFAULT_MOBILE_VIEWPORT
 
 def make_user_data_abonament_basic() -> dict:
     """Generate dynamic payload for user creation."""
@@ -11,3 +12,6 @@ def make_user_data_abonament_basic() -> dict:
         "abonament": "basic"
     }
     return data
+
+def make_display_size(mobile):
+    return DEFAULT_MOBILE_VIEWPORT if mobile else DEFAULT_DISPLAY_VIEWPORT 

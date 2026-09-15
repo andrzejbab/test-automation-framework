@@ -57,6 +57,13 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         help="Base URL for UI tests (overrides MAILPIT_HOST)",
     )
 
+    parser.addoption(
+        "--mobile",
+        action="store",
+        default=None,
+        help="Option to run tests for mobile devices (true|false)",
+    )
+
 
 
 # Load env files before fixtures run.

@@ -86,27 +86,15 @@ def get_headless(pytestconfig: pytest.Config) -> bool:
         return normalize_bool(env_value)
     return normalize_bool(os.getenv("CI"))
 
-# Internal helpers to build browser drivers
-# def build_chrome_driver(headless: bool) -> webdriver.Chrome:
-#     options = ChromeOptions()
-#     if headless:
-#         options.add_argument("--headless=new")
-#         options.add_argument("--disable-gpu")
-#     if platform.system() == "Linux":
-#         options.add_argument("--no-sandbox")
-#         options.add_argument("--disable-dev-shm-usage")
-
-#     service = ChromeService(ChromeDriverManager().install())
-#     return webdriver.Chrome(service=service, options=options)
-
-
 @lru_cache(maxsize=1)
 def _get_chromedriver_path() -> str:
     """Download/locate ChromeDriver binary exactly once per test process."""
     return ChromeDriverManager().install()
 
-def build_chrome_driver(headless: bool) -> webdriver.Chrome:
+def build_chrome_driver(headless: bool, width, length) -> webdriver.Chrome:
     options = ChromeOptions()
+
+    options.add_argument(f"--window-size={width},{length}")
     if headless:
         options.add_argument("--headless=new")
         options.add_argument("--disable-gpu")
@@ -119,8 +107,9 @@ def build_chrome_driver(headless: bool) -> webdriver.Chrome:
 
 
 # Internal helpers to build browser drivers
-def build_firefox_driver(headless: bool) -> webdriver.Firefox:
+def build_firefox_driver(headless: bool, width, length) -> webdriver.Firefox:
     options = FirefoxOptions()
+    options.add_argument(f"--window-size={width},{length}")
     if headless:
         options.add_argument("--headless")
 

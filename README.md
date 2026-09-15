@@ -67,26 +67,27 @@ Create a `.env` file in the project root with the following values:
 
 ```env
 # Frontend
-REACT_APP_API_HOST=http://127.0.0.1:8000/
-REACT_APP_FRONTEND_HOST=http://127.0.0.1:3000/
+REACT_APP_API_HOST=http://127.0.0.1:8000
+REACT_APP_FRONTEND_HOST=http://127.0.0.1:3000
 
 # Backend
 SECRET_KEY=your_secret_key
-BACKEND_HOST=http://127.0.0.1:8000/
-FRONTEND_HOST=http://127.0.0.1:3000/
+BACKEND_HOST=http://127.0.0.1:8000
+FRONTEND_HOST=http://127.0.0.1:3000
 ALLOWED_HOSTS=localhost,127.0.0.1
 DJANGO_ADMIN_USER=your_admin
 DJANGO_ADMIN_EMAIL=your_admin@local.local
 DJANGO_ADMIN_PASSWORD=your_password
 
 # Tests
-TEST_API_BASE_URL=http://127.0.0.1:8000/
+TEST_API_BASE_URL=http://127.0.0.1:8000
 TEST_API_ADMIN_USERNAME=your_admin
 TEST_API_ADMIN_PASSWORD=your_password
-MAILPIT_HOST=http://127.0.0.1:8025/
-TEST_UI_BASE_URL=http://127.0.0.1:3000/
+MAILPIT_HOST=http://127.0.0.1:8025
+TEST_UI_BASE_URL=http://127.0.0.1:3000
 UI_BROWSER=chrome
 UI_HEADLESS=true
+MOBILE=false
 ```
 
 ## Getting Started

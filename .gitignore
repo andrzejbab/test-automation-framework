@@ -12,4 +12,4 @@ __init__.py
 sandbox.py
 allure-results/
 allure-report/
-*.deb
+*.deb*

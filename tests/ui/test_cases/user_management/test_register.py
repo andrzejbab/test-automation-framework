@@ -36,6 +36,7 @@ class TestRegisterUser:
         email = user.get("email")
         register_page = (
             self.landing_page.open()
+            .click_price_link()
             .click_select_standard_plan()
             .fill_registration_form(
                 email=email,
