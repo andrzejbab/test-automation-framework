@@ -71,9 +71,9 @@ jobs:
           pip install -r requirements.txt
 
       # Tests
-      - name: Run all tests (API and UI)
+      - name: Run all tests (API and UI) Desktop
         continue-on-error: true
-        run: pytest -m "api or ui"
+        run: pytest -m "api or ui" --mobile=false
         env:
           TEST_API_ADMIN_USERNAME: ${{ secrets.DJANGO_ADMIN_USER }}
           TEST_API_ADMIN_PASSWORD: ${{ secrets.DJANGO_ADMIN_PASSWORD }}

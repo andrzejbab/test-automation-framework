@@ -8,4 +8,5 @@ webdriver-manager
 schemathesis
 pydantic[email]
 allure-pytest
+schemathesis[allure]
     

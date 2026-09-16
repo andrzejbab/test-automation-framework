@@ -109,7 +109,7 @@ class TestUserProfile:
         parsed_response = assert_response(response=response, expected_status=401)
         assert parsed_response.get("detail") == 'Authentication credentials were not provided.'
 
-    @pytest.mark.skip(reason="Error bei backend. Bug fix will be done.")
+    @pytest.mark.api
     @pytest.mark.parametrize(
             "paylaod",
             [
