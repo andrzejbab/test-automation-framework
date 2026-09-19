@@ -90,6 +90,35 @@ UI_HEADLESS=true
 MOBILE=false
 ```
 
+### Optional CLI overrides
+
+The values above are the default environment settings used by the suite, but they can be overridden at runtime with pytest CLI options. CLI flags take precedence over the matching environment variables.
+
+| Environment variable | Pytest CLI option |
+| :--- | :--- |
+| `TEST_API_BASE_URL` | `--api-base-url` |
+| `TEST_API_ADMIN_USERNAME` | `--api-admin-username` |
+| `TEST_API_ADMIN_PASSWORD` | `--api-admin-password` |
+| `UI_BROWSER` | `--ui-browser` |
+| `UI_HEADLESS` | `--ui-headless` |
+| `TEST_UI_BASE_URL` | `--ui-base-url` |
+| `MAILPIT_HOST` | `--api-mailpit-host` |
+| `MOBILE` | `--mobile` |
+
+Example:
+
+```bash
+pytest -m "api or ui" \
+  --api-base-url=http://127.0.0.1:8000 \
+  --api-admin-username=admin \
+  --api-admin-password=secret \
+  --ui-browser=chrome \
+  --ui-headless=true \
+  --ui-base-url=http://127.0.0.1:3000
+```
+
+This is useful when you want to run the same suite against a different environment without changing the project `.env` file.
+
 ## Getting Started
 
 ### 1) Start the target application
@@ -137,7 +166,7 @@ Make sure your virtual environment is active before running the suite.
 ### Run all tests
 
 ```bash
-pytest -m "api or ui"
+pytest -m "contract or api or ui or load"
 ```
 
 ### Run API tests only

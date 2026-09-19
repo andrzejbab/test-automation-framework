@@ -4,7 +4,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 import pytest
 
-@pytest.mark.smoke
+@pytest.mark.laod
 def test_jmeter_run_and_parse():
     jmeter_path = "C:\\D\\apache-jmeter-5.6.3\\apache-jmeter-5.6.3\\bin\\jmeter.bat"  # Update this path
     jmx_path = "./tests/performance/user_management.jmx"             # Update this path
