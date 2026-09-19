@@ -13,3 +13,5 @@ sandbox.py
 allure-results/
 allure-report/
 *.deb*
+*.tgz*
+*apache-jmeter*

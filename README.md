@@ -159,6 +159,23 @@ sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 google-chrome --version
 ```
 
+### 4) Configure JMeter in Linux/Codespace
+
+Install JMeter:
+```bash
+wget https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz
+tar -xzf apache-jmeter-5.6.3.tgz
+```
+
+Then use the Linux binary path:
+```bash
+export JMETER_HOME=/workspaces/test-automation-framework/apache-jmeter-5.6.3
+export PATH="$JMETER_HOME/bin:$PATH"
+which jmeter
+```
+
+
+
 ## Running Tests
 
 Make sure your virtual environment is active before running the suite.
@@ -206,6 +223,14 @@ python3 -m http.server 8001 --directory allure-report
 
 Then open the forwarded port `8001` in your browser.
 
+## Test Reporting JMeter
+
+```bash
+python3 -m http.server 8001 --directory ./tests/performance/report
+```
+
+
+
 ## Visual Debugging with VNC
 
 When working in GitHub Codespaces or remote environments, you can run UI tests with a visible browser window by exposing a virtual desktop.
@@ -222,10 +247,12 @@ sudo apt-get install -y xvfb x11vnc fluxbox novnc
 
 ```bash
 Xvfb :99 -screen 0 1920x1080x24 &
+
 export DISPLAY=:99
+
 fluxbox >/tmp/fluxbox.log 2>&1 &
-x11vnc -display :99 -forever -shared -rfbport 5900 -nopw >/tmp/x11vnc.log 2>&1 &
-/usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 >/tmp/novnc.log 2>&1 &
+
+x11vnc -display :99 -forever -shared -rfbport 5900 -nopw >/tmp/x11vnc.log 2>&1 & /usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 >/tmp/novnc.log 2>&1 &
 ```
 
 ### 3) Connect to the browser session
@@ -247,6 +274,14 @@ pytest tests/ui -m ui --ui-headless false
 ```
 
 You can also set `UI_HEADLESS=false` and `DISPLAY=:99` in your `.env` file for use with the VS Code testing panel.
+
+### 5) Open Jmeter GUI with VNC
+```bash
+export DISPLAY=:99
+export JMETER_HOME=/workspaces/test-automation-framework/apache-jmeter-5.6.3
+export PATH="$JMETER_HOME/bin:$PATH"
+jmeter
+```
 
 ## VS Code Configuration Tips
 
