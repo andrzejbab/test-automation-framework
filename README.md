@@ -140,14 +140,9 @@ source tests/venv/bin/activate
 pip install --upgrade pip
 pip install -r tests/requirements.txt
 ```
+or use: __./scripts/setup_python_virtual_environment.sh__
 
-Verify that Pytest is installed correctly:
-
-```bash
-python -m pytest --version
-```
-
-### 3) Install browser dependencies
+### 3) Install browser(Chrome) dependencies
 
 For Linux-based UI testing, install Chromium and Google Chrome:
 
@@ -158,6 +153,7 @@ wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.de
 sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
 google-chrome --version
 ```
+or use: __./scripts/install_chrome_dependencies.sh__
 
 ### 4) Configure JMeter in Linux/Codespace
 
@@ -166,6 +162,7 @@ Install JMeter:
 wget https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz
 tar -xzf apache-jmeter-5.6.3.tgz
 ```
+or use: __./scripts/install_jmeter.sh__
 
 Then use the Linux binary path:
 ```bash
@@ -173,6 +170,8 @@ export JMETER_HOME=/workspaces/test-automation-framework/apache-jmeter-5.6.3
 export PATH="$JMETER_HOME/bin:$PATH"
 which jmeter
 ```
+or use: __./scripts/export_jmeter.sh__
+
 
 
 
@@ -207,12 +206,14 @@ Install Allure CLI:
 ```bash
 npm install -g allure-commandline
 ```
+or use: __./scripts/install_allure.sh__
 
 View the report locally:
 
 ```bash
 allure serve tests/allure-results
 ```
+or use: __./scripts/view_allure_results_local.sh__
 
 Generate a static report on a remote or Codespace environment:
 
@@ -220,6 +221,7 @@ Generate a static report on a remote or Codespace environment:
 allure generate tests/allure-results -o allure-report --clean
 python3 -m http.server 8001 --directory allure-report
 ```
+or use: __./scripts/view_allure_results_remote.sh__
 
 Then open the forwarded port `8001` in your browser.
 
@@ -228,6 +230,7 @@ Then open the forwarded port `8001` in your browser.
 ```bash
 python3 -m http.server 8001 --directory ./tests/performance/report
 ```
+or use: __./scripts/report_jmeter.sh__
 
 
 
@@ -242,6 +245,7 @@ For development / debugging with Codespace install extensions:  "Python Debugger
 ```bash
 sudo apt-get install -y xvfb x11vnc fluxbox novnc
 ```
+or use: __./scripts/install_vnc.sh__
 
 ### 2) Start the virtual desktop
 
@@ -254,6 +258,7 @@ fluxbox >/tmp/fluxbox.log 2>&1 &
 
 x11vnc -display :99 -forever -shared -rfbport 5900 -nopw >/tmp/x11vnc.log 2>&1 & /usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 >/tmp/novnc.log 2>&1 &
 ```
+or use: __./scripts/start_vnc_desktop.sh__
 
 ### 3) Connect to the browser session
 
@@ -270,8 +275,11 @@ Then click Connect.
 ```bash
 export DISPLAY=:99
 export CHROME_BINARY=/usr/bin/google-chrome
+
 pytest tests/ui -m ui --ui-headless false
 ```
+
+or use: __./scripts/run_ui_tests_no_headless.sh__
 
 You can also set `UI_HEADLESS=false` and `DISPLAY=:99` in your `.env` file for use with the VS Code testing panel.
 
@@ -282,6 +290,7 @@ export JMETER_HOME=/workspaces/test-automation-framework/apache-jmeter-5.6.3
 export PATH="$JMETER_HOME/bin:$PATH"
 jmeter
 ```
+or use: __./scripts/start_jmeter_in_vnc.sh__
 
 ## VS Code Configuration Tips
 

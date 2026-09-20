@@ -15,7 +15,6 @@ class TestLoad:
 
         test_jmx_path = "./tests/performance/user_management.jmx" 
 
-
         # Run JMeter
         cmd = [setup_jmeter.get("jmeter_path"), "-n", "-t", test_jmx_path, "-l", 
                setup_jmeter.get("result_file"), "-e", "-o",setup_jmeter.get("report_path"),
