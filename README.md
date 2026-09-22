@@ -63,7 +63,7 @@ Before starting, ensure the following tools are installed:
 
 ## Environment Setup
 
-Create a `.env` file in the project root with the following values:
+Create a `.env` file in the project root with the following values(local setup):
 
 ```env
 # Frontend
@@ -89,6 +89,16 @@ UI_BROWSER=chrome
 UI_HEADLESS=true
 MOBILE=false
 ```
+### Codespaces preview
+
+If you open this repository in a browser-accessible Codespace (the GitHub preview URL), the frontend and backend will be served under a proxy HTTPS hostname rather than `localhost`. For that case we provide a helper env file named `.env.codespaces` in the repository root.
+
+- Keep secrets out of the repo: copy your `SECRET_KEY` and other secrets into `.env.codespaces` locally (do not commit them).
+- Leave `REACT_APP_API_HOST` empty in `.env.codespaces` so the frontend will use `window.location.origin` (recommended), or set it explicitly to your preview API URL (e.g. `https://<your-preview-host>`).
+- Ensure Django accepts the proxy hostname by adding the preview domains to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` in `.env.codespaces` (the file already includes example wildcard entries for `*.githubpreview.dev` and `*.preview.app.github.dev`).
+
+See `.env.codespaces` for the example values and placeholders.
+
 
 ### Optional CLI overrides
 
