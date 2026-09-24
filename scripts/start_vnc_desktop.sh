@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Start virtual frame buffer in background
-#Xvfb :99 -screen 0 1920x1080x24 &
-Xvfb :99 -screen 0 1600x800x24 &
+Xvfb :99 -screen 0 1920x1080x24 &
+#Xvfb :99 -screen 0 1600x800x24 &
 
 # Set display environment variable for this process and child processes
 export DISPLAY=:99

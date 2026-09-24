@@ -1,40 +1,28 @@
 import pytest
-import os
-import shutil
+import csv
 from pathlib import Path
 
 
-@pytest.fixture(scope="session")
-def setup_jmeter():
-        # set envs
-        project_root = Path(__file__).resolve().parents[2]
-        jmeter_home = project_root / "apache-jmeter-5.6.3"
+@pytest.fixture
+def jmeter_user_account(request, api_client, clean_mailpit):
+    """Create the account consumed by the JMeter CSV data set."""
+    from utility.emails import get_activation_token_from_email_body
+    from utility.factories import make_user_data_abonament_basic
 
-        os.environ["DISPLAY"] = ":99"
-        os.environ["JMETER_HOME"] = str(jmeter_home)
-        os.environ["PATH"] = f"{jmeter_home / 'bin'}{os.pathsep}{os.environ.get('PATH', '')}"
+    user_data = make_user_data_abonament_basic()
+    response = api_client.api_register_user(**user_data)
+    assert response.status_code == 201, f"Failed to create user: {response.text}"
 
-        jmeter_path = os.environ.get("JMETER_HOME")
+    activation_token = get_activation_token_from_email_body(user_data["email"])
+    response = api_client.api_activate_user(activation_token)
+    assert response.status_code == 302, f"Failed to activate user: {response.text}"
 
-        if jmeter_path:
-            jmeter_path = os.path.join(jmeter_path, "bin", "jmeter")
-        else:
-            jmeter_path = shutil.which("jmeter")
+    csv_path = Path(__file__).parent / "data" / "jmeter_test_users.csv"
+    file_mode = "w" if request.param == 1 else "a"
+    with csv_path.open(file_mode, newline="", encoding="utf-8") as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=("username", "password"))
+        if file_mode == "w":
+            writer.writeheader()
+        writer.writerow({"username": user_data["email"], "password": user_data["password"]})
 
-        result_file = "./tests/performance/results.jtl"
-        report_path = "./tests/performance/report"
-
-        # Clean up the report directory before running the test
-        if os.path.exists(report_path):
-            shutil.rmtree(report_path)
-        os.makedirs(report_path, exist_ok=True)
-        # Remove jtl file if it exists
-        if os.path.exists(result_file):
-            os.remove(result_file)
-
-
-        return {
-             "jmeter_path": jmeter_path,
-             "result_file": result_file,
-             "report_path": report_path
-        }
+    return user_data

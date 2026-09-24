@@ -9,4 +9,6 @@ schemathesis
 pydantic[email]
 allure-pytest
 schemathesis[allure]
-    
+bzt
+setuptools
+urwid<3.0
