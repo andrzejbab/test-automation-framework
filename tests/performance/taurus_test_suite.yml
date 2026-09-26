@@ -14,7 +14,7 @@ execution:
 
 scenarios:
   prepare-jmeter-user:
-    script: /workspaces/test-automation-framework/tests/performance/test_load_user_management.py
+    script: /workspaces/test-automation-framework/tests/performance/test_technical_create_user.py
 
   jmeter-test:
     # You can point to an existing JMeter .jmx file here...
@@ -29,6 +29,9 @@ scenarios:
     # ...OR write HTTP requests directly in YAML without opening JMeter
     # requests:
     #  - url: http://example.com/api
+
+    prepare-jmeter-user:
+    script: /workspaces/test-automation-framework/tests/performance/test_technical_remove_user.py
 
 modules:
   local:

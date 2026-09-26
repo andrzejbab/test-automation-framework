@@ -1,28 +1,52 @@
 import pytest
 import csv
 from pathlib import Path
+from utility.factories import make_user_data_abonament_basic
+from api.api_clients.api_client_base import ApiClient
+from utility.emails import get_activation_token_from_email_body
+from utility.factories import make_user_data_abonament_basic
+
+import yaml
+
+@pytest.fixture
+def jmeter_user_count():
+    config_path = Path(__file__).parent / "taurus_test_suite.yml"
+    with config_path.open(encoding="utf-8") as file:
+        config = yaml.safe_load(file)
+
+    jmeter = next(
+        item for item in config["execution"]
+        if item.get("executor") == "jmeter"
+    )
+    return int(jmeter["concurrency"])
 
 
 @pytest.fixture
-def jmeter_user_account(request, api_client, clean_mailpit):
+def jmeter_new_user_accounts(api_client, jmeter_user_count):
     """Create the account consumed by the JMeter CSV data set."""
-    from utility.emails import get_activation_token_from_email_body
-    from utility.factories import make_user_data_abonament_basic
+    
+    for cnt in range(jmeter_user_count+1):
+        user_data = make_user_data_abonament_basic()
+        response = api_client.api_register_user(**user_data)
+        assert response.status_code == 201, f"Failed to create user: {response.text}"
 
-    user_data = make_user_data_abonament_basic()
-    response = api_client.api_register_user(**user_data)
-    assert response.status_code == 201, f"Failed to create user: {response.text}"
+        activation_token = get_activation_token_from_email_body(user_data["email"])
+        response = api_client.api_activate_user(activation_token)
+        assert response.status_code == 302, f"Failed to activate user: {response.text}"
 
-    activation_token = get_activation_token_from_email_body(user_data["email"])
-    response = api_client.api_activate_user(activation_token)
-    assert response.status_code == 302, f"Failed to activate user: {response.text}"
+        csv_path = Path(__file__).parent / "data" / "jmeter_test_users.csv"
+        with csv_path.open(mode="a", newline="", encoding="utf-8") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=("username", "password"))
+            if cnt == 0:
+                writer.writeheader()
+            writer.writerow({"username": user_data["email"], "password": user_data["password"]})
 
+
+@pytest.fixture
+def jmeter_remove_user_accounts(auth_api_client_admin):
+    # cleanup - remove user
     csv_path = Path(__file__).parent / "data" / "jmeter_test_users.csv"
-    file_mode = "w" if request.param == 1 else "a"
-    with csv_path.open(file_mode, newline="", encoding="utf-8") as csv_file:
-        writer = csv.DictWriter(csv_file, fieldnames=("username", "password"))
-        if file_mode == "w":
-            writer.writeheader()
-        writer.writerow({"username": user_data["email"], "password": user_data["password"]})
-
-    return user_data
+    with csv_path.open(newline="", encoding="utf-8") as csv_file:
+        for row in csv.DictReader(csv_file):
+            response = auth_api_client_admin.api_delete_user(row["username"])
+            assert response.status_code == 200, f"Failed to delete user: {response.text}"
