@@ -4,7 +4,7 @@ __pycache__/
 db.sqlite3
 *.pyc
 *.log
-*.env
+*.env*
 report/
 results.jtl
 .hypothesis/

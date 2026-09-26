@@ -63,7 +63,14 @@ Before starting, ensure the following tools are installed:
 
 ## Environment Setup
 
-Create a `.env` file in the project root with the following values(local setup):
+Create a `.env` file in the project root with the following values(local setup)
+
+If you open this repository in a browser-accessible for example Codespace, the frontend and backend will be served under a proxy HTTPS hostname rather than `localhost`. 
+
+Ex: 
+local: http://127.0.0.1:8000
+Codespace: https://<hash>-8000.app.github.dev
+:
 
 ```env
 # Frontend
@@ -71,10 +78,12 @@ REACT_APP_API_HOST=http://127.0.0.1:8000
 REACT_APP_FRONTEND_HOST=http://127.0.0.1:3000
 
 # Backend
-SECRET_KEY=your_secret_key
 BACKEND_HOST=http://127.0.0.1:8000
 FRONTEND_HOST=http://127.0.0.1:3000
-ALLOWED_HOSTS=localhost,127.0.0.1
+ALLOWED_HOSTS=localhost,127.0.0.1, ,https://<hash>-8000.app.github.dev,https://<hash>-3000.app.github.dev
+
+SECRET_KEY=your_secret_key
+# Django admin
 DJANGO_ADMIN_USER=your_admin
 DJANGO_ADMIN_EMAIL=your_admin@local.local
 DJANGO_ADMIN_PASSWORD=your_password
@@ -86,19 +95,10 @@ TEST_API_ADMIN_PASSWORD=your_password
 MAILPIT_HOST=http://127.0.0.1:8025
 TEST_UI_BASE_URL=http://127.0.0.1:3000
 UI_BROWSER=chrome
+# UI Test headless = false / install browser local or use VNC over Codespace
 UI_HEADLESS=true
 MOBILE=false
 ```
-### Codespaces preview
-
-If you open this repository in a browser-accessible Codespace (the GitHub preview URL), the frontend and backend will be served under a proxy HTTPS hostname rather than `localhost`. For that case we provide a helper env file named `.env.codespaces` in the repository root.
-
-- Keep secrets out of the repo: copy your `SECRET_KEY` and other secrets into `.env.codespaces` locally (do not commit them).
-- Leave `REACT_APP_API_HOST` empty in `.env.codespaces` so the frontend will use `window.location.origin` (recommended), or set it explicitly to your preview API URL (e.g. `https://<your-preview-host>`).
-- Ensure Django accepts the proxy hostname by adding the preview domains to `ALLOWED_HOSTS` and `CSRF_TRUSTED_ORIGINS` in `.env.codespaces` (the file already includes example wildcard entries for `*.githubpreview.dev` and `*.preview.app.github.dev`).
-
-See `.env.codespaces` for the example values and placeholders.
-
 
 ### Optional CLI overrides
 
