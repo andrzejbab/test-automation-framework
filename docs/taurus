@@ -14,7 +14,7 @@ To run them sequentially (e.g., run Pytest to ensure functionality works,
 then run JMeter for load testing):
   bzt test-suite.yml -sequential
 
-### RESILTS ##
+### RESULTS ##
 Viewing ResultsOnce you execute the command, Taurus launches a live, real-time ASCII
 dashboard in your terminal. It provides metrics like active users, response times, 
 error rates, and throughput.   When the tests finish, Taurus generates an artifacts/
