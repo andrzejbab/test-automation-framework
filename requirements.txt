@@ -1,0 +1,14 @@
+selenium
+pytest
+pytest-cov  
+pytest-xdist
+requests_mock
+requests
+webdriver-manager
+schemathesis
+pydantic[email]
+allure-pytest
+schemathesis[allure]
+bzt
+setuptools
+urwid<3.0
