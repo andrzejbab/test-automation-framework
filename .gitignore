@@ -15,3 +15,6 @@ allure-report/
 *.deb*
 *.tgz*
 *apache-jmeter*
+20*_*
+*.csv
+*jmeter-report

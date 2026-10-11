@@ -37,6 +37,8 @@ class ApiClient:
         else:
             self._session.headers.pop("Authorization", None)
 
+    def get_api_token(self):
+        return self._api_tokens['access']
     
     @skip_on_connection_error
     def _request(self, method: str, path: str, **kwargs) -> requests.Response:
@@ -54,6 +56,10 @@ class ApiClient:
         return self._request("post","/api/user_management/token/refresh/", json=payload)
     
     ##### Public endpoints #####
+    def api_schema(self):
+        headers = {'Authorization': None}
+        return self._request('get', "/api/schema/", headers= headers)
+
     # Creates a new user with default club context and sends an activation email.
     def api_register_user(self, email: str, password: str, accept_terms: bool, accept_privacy_policy: bool, abonament: str) -> requests.Response:
         headers = {'Authorization': None}

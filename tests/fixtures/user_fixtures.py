@@ -6,9 +6,7 @@ from api.api_clients.api_client_base import ApiClient, MockApiClient
 from utility.utility import get_option_env, fetch_and_validate_tokens
 from utility.factories import make_user_data_abonament_basic
 from utility.emails import get_activation_token_from_email_body, clear_emails_mailpit
-import os
-from urllib.parse import urljoin
-from schemathesis import openapi
+
 
 @pytest.fixture(scope="session")
 def api_client(request, api_base_url):  # api_base_url from your existing fixture
@@ -59,21 +57,37 @@ def clean_mailpit(pytestconfig: pytest.Config):
     clear_emails_mailpit(mailpit_host)
 
 @pytest.fixture(scope="function")
-def new_user_account(api_client, auth_api_client_admin, clean_mailpit):
-    """Create test user account """
+def registered_user(api_client):
+    """Register a new user (unactivated) - for contract tests and activation flows"""
     user_data = make_user_data_abonament_basic()
-    response = api_client.api_register_user(**user_data)  
-    # Ensure the registration was successful (201 Created)
-    assert response.status_code == 201, f"Failed to create user: {response.text}"
+    response = api_client.api_register_user(**user_data)
+    assert response.status_code == 201, f"Failed to register user: {response.text}"
+    return user_data
 
-    user_email = user_data.get("email")
-    # Get activation token from Email (mailpit)
+
+@pytest.fixture(scope="function")
+def activated_user(api_client, registered_user):
+    """Activate a registered user - transitions from unactivated to activated state"""
+    user_email = registered_user.get("email")
+    # Get activation token from Email (Mailpit)
     activation_token = get_activation_token_from_email_body(user_email)
     response = api_client.api_activate_user(activation_token)
     assert response.status_code == 302, f"Failed to activate user: {response.text}"
-    yield user_data
-    # cleanup - remove user
-    response = auth_api_client_admin.api_delete_user(user_email)
+    return registered_user
+
+@pytest.fixture(scope="function")
+def activated_user_reset_password(api_client, activated_user):
+    user_email = activated_user.get("email")
+    response = api_client.api_password_reset(user_email)
+    assert response.status_code == 200, f"Failed to reset password: {response.text}"
+    return activated_user
+
+@pytest.fixture(scope="function")
+def new_user_account(activated_user, auth_api_client_admin):
+    """Provides fully activated test user with automatic cleanup"""
+    yield activated_user
+    # Cleanup - remove user
+    response = auth_api_client_admin.api_delete_user(activated_user.get("email"))
     assert response.status_code == 200, f"Failed to delete user: {response.text}"
 
 
@@ -91,12 +105,8 @@ def valid_credentials_admin(pytestconfig: pytest.Config) -> Dict[str, str]:
         "password": get_option_env(pytestconfig, "--api-admin-password", "TEST_API_ADMIN_PASSWORD"),
     }
 
-@pytest.fixture(scope="session")
-def api_schema(pytestconfig):
-    """Return api schema from backend"""
-    base_url = get_option_env(pytestconfig, "--api-base-url", "TEST_API_BASE_URL")
-    api_schema_url = "api/schema/"
-    return openapi.from_url(url= urljoin(base_url, api_schema_url))
+
+
 
 
 

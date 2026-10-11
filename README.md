@@ -1,37 +1,16 @@
 # Test Automation Framework
 
-All automated test cases in this project are executed through a GitHub-based CI pipeline, enabling repeatable, version-controlled test runs in the cloud without requiring local orchestration for every execution.
-
 A comprehensive QA automation suite for a containerized SaaS platform. This project combines black-box UI automation with API contract validation and test orchestration to provide end-to-end quality coverage for modern web applications.
 
-## Run in GitHub without installing locally
-
-You can start and run this project directly in GitHub without installing dependencies on your machine:
-
-### Option 1: Use GitHub Codespaces
-
-1. Open the repository in GitHub.
-2. Click the `Code` button.
-3. Select `Codespaces` and create a new codespace.
-4. Once the environment is ready, the repository is already mounted in a preconfigured dev environment.
-5. Start the app and run the tests from the terminal inside the codespace.
-
-### Option 2: Use GitHub Actions
-
-1. Push your branch to GitHub.
-2. Open the repository's `Actions` tab.
-3. Select the workflow for test execution.
-4. Run the workflow manually or let it trigger automatically on pushes and pull requests.
-5. Review the test logs and artifacts directly in the GitHub UI.
-
-This approach is ideal for CI validation, remote collaboration, and environments where local setup is not required.
+All automated test cases in this project are executed through a GitHub-based CI pipeline, enabling repeatable, version-controlled test runs in the cloud without requiring local orchestration for every execution.
 
 ## Overview
 
 This repository demonstrates a complete automation pipeline for a SaaS product deployed in isolated Docker environments. It validates:
 
-- API behavior using OpenAPI/Swagger-driven property-based testing
+- Contract and REST API validation using OpenAPI/Swagger-driven testing
 - End-to-end user flows using Selenium UI automation
+- Application performance under load using JMeter load testing
 - Test execution and reporting with Pytest and Allure
 - Local and remote execution in GitHub Codespaces or Dockerized environments
 
@@ -43,16 +22,82 @@ This repository demonstrates a complete automation pipeline for a SaaS product d
 | Selenium | UI automation | Automates browser interactions for E2E validation |
 | Schemathesis | API testing | Generates property-based API tests from OpenAPI specs |
 | Docker | Environment orchestration | Runs the app and dependencies in isolated containers |
+| Taurus | Orchestration | Coordinates and executes JMeter test plans with configurable load profiles and reusable test configuration |
+| JMeter | Load testing | Generates realistic user traffic and measures application performance under load |
 | Allure | Reporting | Produces rich HTML reports for test outcomes |
+
 
 ## Test Scope
 
 - Property-based API testing using Schemathesis against the backend Swagger/OpenAPI schema
 - End-to-end UI validation for user journeys and critical flows
+- Load testing with JMeter to measure application performance and identify bottlenecks
 - CI-friendly execution with headless browser support and report generation
 - Visual debugging support using VNC for local and remote development workflows
 
-## Prerequisites
+
+
+## Environment Setup for GitHub Actions CI
+
+The CI pipeline reads configuration from GitHub Actions secrets and variables. Values are injected into the test environment and Docker Compose configuration before the application stack and test suites are started.
+
+Required GitHub Actions configuration:
+- `GHCR_PAT` — GitHub Container Registry token used to pull the required Docker images.
+
+Recommended GitHub secrets:
+- `SECRET_KEY`
+- `DJANGO_ADMIN_USER`
+- `DJANGO_ADMIN_EMAIL`
+- `DJANGO_ADMIN_PASSWORD`
+
+Recommended GitHub variables:
+- `BACKEND_HOST`
+- `FRONTEND_HOST`
+- `ALLOWED_HOSTS`
+- `REACT_APP_FRONTEND_HOST`
+- `TEST_API_BASE_URL`
+- `TEST_UI_BASE_URL`
+- `MAILPIT_HOST`
+- `UI_BROWSER`
+- `UI_HEADLESS`
+- `VUSERS`
+- `RAMPUP`
+- `HOLDFOR`
+
+If a secret or variable is not defined, the workflow falls back to local development defaults such as `http://localhost:8000` and `http://localhost:3000`.
+
+Example GitHub configuration:
+
+```bash
+# GitHub Secrets
+GHCR_PAT=your_github_token
+SECRET_KEY=your_secret_key
+DJANGO_ADMIN_USER=your_admin
+DJANGO_ADMIN_EMAIL=your_admin@local.local
+DJANGO_ADMIN_PASSWORD=your_password
+
+# GitHub Variables
+BACKEND_HOST=http://localhost:8000
+FRONTEND_HOST=http://localhost:3000
+ALLOWED_HOSTS=localhost,127.0.0.1
+REACT_APP_FRONTEND_HOST=http://localhost:3000
+TEST_API_BASE_URL=http://localhost:8000/
+TEST_UI_BASE_URL=http://localhost:3000/
+MAILPIT_HOST=http://localhost:8025
+UI_BROWSER=chrome
+UI_HEADLESS=true
+VUSERS=2
+RAMPUP=3s
+HOLDFOR=20s
+```
+
+The workflow creates a `.env` file automatically at runtime from these values, which is then used by Docker Compose and the test suite.
+
+To start the CI workflow, push a commit to a branch or open a pull request in the repository. GitHub Actions will automatically trigger the pipeline and execute the contract, API, UI, and load tests in sequence.
+
+## Environment Setup
+
+This setup was tested locally on Ubuntu and GitHub Codespaces.
 
 Before starting, ensure the following tools are installed:
 
@@ -60,42 +105,40 @@ Before starting, ensure the following tools are installed:
 - Python 3.x
 - Node.js and npm
 - Git
+- Java JDK
 
-## Environment Setup
+Use: ./scripts/setup_basic.sh
 
-Create a `.env` file in the project root with the following values(local setup)
+Normally, when you add your user account to the docker group (using sudo usermod -aG docker $USER), you need to log out and log back in (or reboot) for the system to recognize your new permissions
 
-If you open this repository in a browser-accessible for example Codespace, the frontend and backend will be served under a proxy HTTPS hostname rather than `localhost`. 
+Create a `.env` file in the project root with the values required for local execution.
 
-Ex: 
-local: http://127.0.0.1:8000
-Codespace: https://<hash>-8000.app.github.dev
-:
+When working in a browser-accessible environment such as GitHub Codespaces, the application is typically exposed through a proxy HTTPS endpoint rather than `localhost`. In those cases, use the generated Codespace URL instead of the local host address.
+
+Example URLs:
+- Local: `http://127.0.0.1:8000`
+- Codespace: `https://<hash>-8000.app.github.dev`
 
 ```env
-# Frontend
+# Target application
 REACT_APP_API_HOST=http://127.0.0.1:8000
 REACT_APP_FRONTEND_HOST=http://127.0.0.1:3000
-
-# Backend
 BACKEND_HOST=http://127.0.0.1:8000
 FRONTEND_HOST=http://127.0.0.1:3000
 ALLOWED_HOSTS=localhost,127.0.0.1, ,https://<hash>-8000.app.github.dev,https://<hash>-3000.app.github.dev
-
 SECRET_KEY=your_secret_key
-# Django admin
 DJANGO_ADMIN_USER=your_admin
 DJANGO_ADMIN_EMAIL=your_admin@local.local
 DJANGO_ADMIN_PASSWORD=your_password
 
-# Tests
+# Functional tests
 TEST_API_BASE_URL=http://127.0.0.1:8000
 TEST_API_ADMIN_USERNAME=your_admin
 TEST_API_ADMIN_PASSWORD=your_password
 MAILPIT_HOST=http://127.0.0.1:8025
 TEST_UI_BASE_URL=http://127.0.0.1:3000
 UI_BROWSER=chrome
-# UI Test headless = false / install browser local or use VNC over Codespace
+# UI Test headless = false / install browser locally or use VNC in Codespaces
 UI_HEADLESS=true
 MOBILE=false
 ```
@@ -132,8 +175,9 @@ This is useful when you want to run the same suite against a different environme
 ## Getting Started
 
 ### 1) Start the target application
+The application designated for testing is a web-based Software as a Service (SaaS) solution for small sports club management ahead of its upcoming public release.
 
-Pull the Docker images and start the app stack:
+Pull the required Docker images and start the target application stack:
 
 ```bash
 export GITHUB_TOKEN="token_here"
@@ -142,13 +186,14 @@ docker compose -f docker-compose-pull.yml pull
 docker compose -f docker-compose-pull.yml up -d
 ```
 
-### 2) Set up a Python virtual environment
+### 2) Set up a Python virtual environment and test depedencies
 
 ```bash
+sudo apt install python3.14-venv
 python3 -m venv tests/venv
 source tests/venv/bin/activate
 pip install --upgrade pip
-pip install -r tests/requirements.txt
+pip install -r requirements.txt
 ```
 or use: __./scripts/setup_python_virtual_environment.sh__
 
@@ -185,14 +230,20 @@ or use: __./scripts/export_jmeter.sh__
 
 
 
-## Running Tests
+## Running Functional Testing
 
 Make sure your virtual environment is active before running the suite.
 
 ### Run all tests
 
 ```bash
-pytest -m "contract or api or ui or load"
+pytest -m "contract or api or ui"
+```
+
+### Run API Contract tests only
+
+```bash
+pytest -m "contract"
 ```
 
 ### Run API tests only
@@ -207,41 +258,62 @@ pytest -m "api"
 pytest -m "ui"
 ```
 
-## Test Reporting with Allure
+### Test Reporting with Allure
 
-Test results are stored in `tests/allure-results`.
+Test results are stored in `tests/allure-report`.
 
 Install Allure CLI:
 
 ```bash
-npm install -g allure-commandline
+sudo npm install -g allure-commandline
 ```
 or use: __./scripts/install_allure.sh__
 
 View the report locally:
 
 ```bash
-allure serve tests/allure-results
+allure serve tests/allure-report
 ```
 or use: __./scripts/view_allure_results_local.sh__
 
 Generate a static report on a remote or Codespace environment:
 
 ```bash
-allure generate tests/allure-results -o allure-report --clean
+allure generate tests/allure-report -o allure-report --clean
 python3 -m http.server 8001 --directory allure-report
 ```
 or use: __./scripts/view_allure_results_remote.sh__
 
 Then open the forwarded port `8001` in your browser.
+## Running Non-Functional Testing
+
+The load test configuration requires the following parameters to be defined:
+
+- `concurrency`: number of concurrent virtual users
+- `ramp-up`: duration required to reach the target concurrency level
+- `hold-for`: duration for which the target load is sustained
+
+```bash
+pytest tests/performance/technical/test_technical_update_jmeter_target.py
+
+python -m bzt \
+  -o settings.artifacts-dir="tests/jmeter-report" \
+  -o execution.1.concurrency="4" \
+  -o execution.1.ramp-up="10s" \
+  -o execution.1.hold-for="40s" \
+  tests/performance/taurus_test_suite.yml
+```
 
 ## Test Reporting JMeter
 
 ```bash
-python3 -m http.server 8001 --directory ./tests/performance/report
+apache-jmeter-5.6.3/bin/jmeter -g "tests/jmeter-report/kpi.jtl" -o tests/jmeter-report/html
+
+python3 -m http.server 8001 --directory ./tests/jmeter-report
 ```
 or use: __./scripts/report_jmeter.sh__
 
+then open  http://localhost:8001/html/index.html
 
 
 ## Visual Debugging with VNC
