@@ -18,6 +18,7 @@ def mobile_screen_size():
 
 @pytest.fixture(scope="function")
 def driver(pytestconfig: pytest.Config):
+    """Initail driver settings"""
     browser = get_browser(pytestconfig)
     headless = get_headless(pytestconfig)
     is_mobile = normalize_bool(get_option_env(pytestconfig, "--mobile", "MOBILE"))
@@ -36,13 +37,12 @@ def driver(pytestconfig: pytest.Config):
     driver_instance.quit()
 
 
-
-
 @pytest.fixture()
 def log_in_user(new_user_account, driver): 
-        club_management_page = LoginPage(driver).login_page.open().login_as_valid_user(new_user_account.get("email"), 
+    """"""
+    defualt_page = LoginPage(driver).open().login_as_valid_user(new_user_account.get("email"), 
                                                    new_user_account.get("password"))
-        assert club_management_page.check_user_registered()
-        yield
-        # cleanup
-        assert club_management_page.logout_click().is_loaded()
+    assert defualt_page.top_bar.user_settings_dropdown.check_user_registered()
+    yield defualt_page
+    # cleanup
+    assert defualt_page.logout_click().is_loaded()

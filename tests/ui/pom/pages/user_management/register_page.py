@@ -1,11 +1,11 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import allure
-from ui.pom.base.base_page import BasePage
+from ui.pom.base.base import Base
 from utility.emails import get_url_from_email_body
 
 
-class RegisterPage(BasePage):
+class RegisterPage(Base):
     REGISTER_MSG = "Wysłaliśmy email aktywacyjny. Aktywuj konto klikając w link w wiadomości (sprawdź także folder SPAM)."
 
     def __init__(self, driver):

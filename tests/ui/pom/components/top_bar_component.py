@@ -1,8 +1,9 @@
-from ui.pom.base.base_page import BasePage
-from ui.pom.components.user_settings_dropdown_component import UserSettingsDropdownComponent
 from selenium.webdriver.common.by import By
+from ui.pom.components.user_settings_dropdown_component import UserSettingsDropdownComponent
+from ui.pom.base.base_component import BaseComponent
 
-class TopBarComponent(BasePage):
+
+class TopBarComponent(BaseComponent):
     def __init__(self, driver):
         super().__init__(driver)
         # Selectors

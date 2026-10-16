@@ -2,11 +2,11 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 import allure
-from ui.pom.base.base_page import BasePage
+from ui.pom.base.base import Base
 from utility.emails import get_url_from_email_body
 
 
-class PasswordResetPage(BasePage):
+class PasswordResetPage(Base):
     SUBMIT_MSG = "Jeśli podany email istnieje, wysłaliśmy instrukcje resetowania hasła."
 
     def __init__(self, driver):

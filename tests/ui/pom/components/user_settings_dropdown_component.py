@@ -1,11 +1,10 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-from ui.pom.base.base_page import BasePage
-from ui.pom.pages.user_management.login_page import LoginPage
 from ui.pom.pages.user_management.change_password_page import ChangePasswordPage
+from ui.pom.base.base_component import BaseComponent
 
-class UserSettingsDropdownComponent(BasePage):
+class UserSettingsDropdownComponent(BaseComponent):
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -34,6 +33,7 @@ class UserSettingsDropdownComponent(BasePage):
     def logout_click(self):
         self._open_dropdown()
         self.wait.until(EC.element_to_be_clickable(self.logout_button)).click()
+        from ui.pom.pages.user_management.login_page import LoginPage
         return LoginPage(self.driver)
 
     def check_user_registered(self):

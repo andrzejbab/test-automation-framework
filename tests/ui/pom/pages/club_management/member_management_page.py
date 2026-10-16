@@ -1,17 +1,13 @@
 
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
-from tests.ui.pom.club_management.club_sidebar import ClubSidebar
 
 class MemberManagementPage:
     def __init__(self, driver):
-        self.driver = driver
-        self.club_sidebar = ClubSidebar(driver)
+        super().__init__(driver)
         self.add_member_button = (By.ID, 'add-member-button')
         self.table_rows = (By.XPATH, '//*[@id="root"]/div/div[2]/div[2]/div/div/div/table/tbody/tr')  # Select all rows in the table body
-        self.wait = WebDriverWait(self.driver, 10)
 
     def click_add_member(self):
         self.club_sidebar.go_to_members()
