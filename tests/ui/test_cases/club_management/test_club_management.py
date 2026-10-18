@@ -15,7 +15,7 @@ class TestClubManagement:
         """Setup fixture to initialize the starting page object."""
         self.news_page: NewsPage = log_in_user
 
-    @allure.story("User can create club profile")
+    @allure.story("User can create full club profile")
     @pytest.mark.parametrize("club_profile", 
     [{
         "club name": "Test club",
@@ -25,7 +25,10 @@ class TestClubManagement:
         "location": "Warszawa",
         "opening": "07:00",
         "closing": "20:00",
-        "logo picture": "club_logo.png"
+        "logo picture": "club_logo.png",
+        "club pictures": ["club_pic1.png", "club_pic2.png"],
+        "sobota": ["Sobota", "08:00", "21:00"],
+        "niedziela": ["Niedziela", "08:00", "21:00"],
     }])
     def test_update_club_profile(self, club_profile):
         """
@@ -34,22 +37,29 @@ class TestClubManagement:
         2. Fill up form with basic data
         3. Set opening hours
         4. Add logo and club pictures
-        5. Check if save alert appeared correctly
+        5. Save and check if save alert appeared correctly
         6. Navigate to other context (news)
         7. Navigate to create club profile
         8. Check id data are save correctly
         """
+        # 1
         create_club_profile_page: ClubProfilePage = self.news_page.side_menu.go_to_create_club_profile()
+        # 2
         create_club_profile_page.update_club_basic_data(club_name =  club_profile.get("club name"),
                                                         phone= club_profile.get("phone"),
                                                         email = club_profile.get("email"),
                                                         website =  club_profile.get("website"),
                                                         location = club_profile.get("location")
                                                         )
-        create_club_profile_page.update_opening_hours_mo_fr(club_profile.get("opening"),
+        # 3
+        create_club_profile_page.update_opening_closing_hours_mo_fr(club_profile.get("opening"),
                                                              club_profile.get("closing"))
+        create_club_profile_page.update_opening_closing_hours(*club_profile.get("sobota"))
+        create_club_profile_page.update_opening_closing_hours(*club_profile.get("niedziela"))
+        # 4
         create_club_profile_page.update_logo_picture(picture_name=club_profile.get("logo picture"))
-
+        create_club_profile_page.upload_club_picture(picture_name_list=club_profile.get("club pictures"))
+        #5
         create_club_profile_page.save_profile()
 
         assert create_club_profile_page.get_alert_message() == ClubProfilePage.SAVE_MESSAGE

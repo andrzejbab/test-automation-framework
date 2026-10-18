@@ -9,6 +9,7 @@ from pathlib import Path
 class ClubProfilePage(BasePage):
 
     SAVE_MESSAGE = "Profil klubu został zaktualizowany."
+
     def __init__(self, driver):
         super().__init__(driver)
 
@@ -48,12 +49,7 @@ class ClubProfilePage(BasePage):
         self.wait_until_element_to_be_clickable(self.location).send_keys(location)   
         return self
 
-
-    @allure.step("Set opening hours simultaneously (mo-fr): {opening_hr} \n {closing_hr}")
-    def update_opening_hours_mo_fr(self, opening_hr, closing_hr):
-        opening_elem = self.wait_until_presence_of_element_located(self.opening_simultaneously)
-        closing_elem = self.wait_until_presence_of_element_located(self.closing_simultaneously)
-
+    def _set_time(self, opening_elem, opening_hr, closing_elem, closing_hr):
         # JavaScript snippet that sets the value and fires both input and change events
         # This script uses the native prototype setter to force React/Vue components to recognize the value
         set_time_script = """
@@ -77,18 +73,41 @@ class ClubProfilePage(BasePage):
         # Execute for closing hour
         self.driver.execute_script(set_time_script, closing_elem, closing_hr)
 
+
+    @allure.step("Set opening / closign hours: ({day}): {opening_hr} \n {closing_hr}")
+    def update_opening_closing_hours(self, day, opening_hr, closing_hr):
+        opening_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[@type='time'][1]")
+        closing_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[@type='time'][2]")
+        opening_elem = self.wait_until_presence_of_element_located(opening_locator)
+        closing_elem = self.wait_until_presence_of_element_located(closing_locator)
+        self._set_time(opening_elem, opening_hr, closing_elem, closing_hr)
+        return self
+
+
+    @allure.step("Set opening / closing hours simultaneously (mo-fr): {opening_hr} \n {closing_hr}")
+    def update_opening_closing_hours_mo_fr(self, opening_hr, closing_hr):
+        opening_elem = self.wait_until_presence_of_element_located(self.opening_simultaneously)
+        closing_elem = self.wait_until_presence_of_element_located(self.closing_simultaneously)
+        self._set_time(opening_elem, opening_hr, closing_elem, closing_hr)
         # Click the apply button
         self.wait_until_element_to_be_clickable(self.apply_simultaneously).click()
         return self
 
 
-    @allure.step("Set club logo picture: {picture_name}")
+    @allure.step("Upload club logo picture: {picture_name}")
     def update_logo_picture(self, picture_name):
-        picture_path = Path(get_abs_path_to_tests(),"resource",picture_name)
-        self.wait_until_presence_of_element_located(self.logo_pic).send_keys(str(picture_path))
+        picture_path = str(Path(get_abs_path_to_tests(),"resource",picture_name))
+        self.wait_until_presence_of_element_located(self.logo_pic).send_keys(picture_path)
         return self
 
-
+    @allure.step("Upload clubpicture: {picture_name_list}")
+    def upload_club_picture(self, picture_name_list: list):
+        pics_to_upload = []    
+        for picture in picture_name_list:
+            pics_to_upload.append(str(Path(get_abs_path_to_tests(),"resource",picture)))
+        
+        self.wait_until_presence_of_element_located(self.club_pics).send_keys("\n".join(pics_to_upload))
+        return self
 
     @allure.step("Save club profil")
     def save_profile(self):
@@ -98,5 +117,4 @@ class ClubProfilePage(BasePage):
 
         
     
-
 
