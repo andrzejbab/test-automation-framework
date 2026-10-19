@@ -2,6 +2,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from ui.pom.base.base_component import BaseComponent
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 
@@ -37,7 +38,7 @@ class ClubSideMenuComponent(BaseComponent):
     
 
     def go_to_news(self):
-        self.wait_until_element_to_be_clickable(self.news).click()
+        self.wait_until_element_to_be_clickable(self.news, move_to_element=True).click()
         from ui.pom.pages.news_page import NewsPage
         return NewsPage(self.driver)
 

@@ -39,9 +39,9 @@ class TestClubManagement:
         4. Add logo and club pictures
         5. Save and check if save alert appeared correctly
         6. Navigate to other context (news)
-        7. Navigate to create club profile
-        8. Check id data are save correctly
+        7. Navigate to create club profile and check if data are saved correctly
         """
+
         # 1
         create_club_profile_page: ClubProfilePage = self.news_page.side_menu.go_to_create_club_profile()
         # 2
@@ -61,12 +61,25 @@ class TestClubManagement:
         create_club_profile_page.upload_club_picture(picture_name_list=club_profile.get("club pictures"))
         #5
         create_club_profile_page.save_profile()
-
         assert create_club_profile_page.get_alert_message() == ClubProfilePage.SAVE_MESSAGE
+        #6
+        create_club_profile_page.side_menu.go_to_news().side_menu.go_to_create_club_profile()
+        #7
+        assert create_club_profile_page.get_opening_hour_simultaneously() == ""
+        assert create_club_profile_page.get_closing_hour_simultaneously() == ""
 
-        #create_club_profile_page.side_menu.go_to_news().side_menu.go_to_create_club_profile()
+        assert create_club_profile_page.get_club_name() == club_profile.get("club name")
+        assert create_club_profile_page.get_club_phone() == club_profile.get("phone")
+        assert create_club_profile_page.get_club_email() == club_profile.get("email")
+        assert create_club_profile_page.get_club_website() == club_profile.get("website")
+        assert create_club_profile_page.get_club_location() == club_profile.get("location")
 
+        for day in ("Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek"):
+            assert create_club_profile_page.get_opening_hour(day) == club_profile.get("opening")
+            assert create_club_profile_page.get_closing_hour(day) == club_profile.get("closing")
 
+        for day, opening, closing in (club_profile.get("sobota"), club_profile.get("niedziela")):
+            assert create_club_profile_page.get_opening_hour(day) == opening
+            assert create_club_profile_page.get_closing_hour(day) == closing
 
-
-
+        

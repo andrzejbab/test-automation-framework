@@ -35,19 +35,6 @@ class ClubProfilePage(BasePage):
         # Save profile data
         self.save_button = (By.ID, "club-profile-submit-btn") 
 
-    @allure.step("Get allert message")
-    def get_alert_message(self):
-        return self.wait_until_visibility_of_element_located(self.alert_save).text
-
-
-    @allure.step("Set club basic data {club_name}, {phone}, {email}, {website}, {location}")
-    def update_club_basic_data(self, club_name, phone, email, website, location):
-        self.wait_until_element_to_be_clickable(self.name).send_keys(club_name)
-        self.wait_until_element_to_be_clickable(self.phone).send_keys(phone)
-        self.wait_until_element_to_be_clickable(self.email).send_keys(email)
-        self.wait_until_element_to_be_clickable(self.website).send_keys(website)
-        self.wait_until_element_to_be_clickable(self.location).send_keys(location)   
-        return self
 
     def _set_time(self, opening_elem, opening_hr, closing_elem, closing_hr):
         # JavaScript snippet that sets the value and fires both input and change events
@@ -73,6 +60,40 @@ class ClubProfilePage(BasePage):
         # Execute for closing hour
         self.driver.execute_script(set_time_script, closing_elem, closing_hr)
 
+    @allure.step("Get allert message")
+    def get_alert_message(self):
+        return self.wait_until_visibility_of_element_located(self.alert_save).text
+
+
+    @allure.step("Set club basic data {club_name}, {phone}, {email}, {website}, {location}")
+    def update_club_basic_data(self, club_name, phone, email, website, location):
+        self.wait_until_element_to_be_clickable(self.name).send_keys(club_name)
+        self.wait_until_element_to_be_clickable(self.phone).send_keys(phone)
+        self.wait_until_element_to_be_clickable(self.email).send_keys(email)
+        self.wait_until_element_to_be_clickable(self.website).send_keys(website)
+        self.wait_until_element_to_be_clickable(self.location).send_keys(location)   
+        return self
+
+    @allure.step("Get club name")
+    def get_club_name(self):
+        return self.wait_until_element_to_be_clickable(self.name).get_attribute("value")
+
+    @allure.step("Get club phone")
+    def get_club_phone(self):
+        return self.wait_until_element_to_be_clickable(self.phone).get_attribute("value")
+
+    @allure.step("Get club email")
+    def get_club_email(self):
+        return self.wait_until_element_to_be_clickable(self.email).get_attribute("value")
+
+    @allure.step("Get club website")
+    def get_club_website(self):
+        return self.wait_until_element_to_be_clickable(self.website).get_attribute("value")
+
+    @allure.step("Get club location")
+    def get_club_location(self):
+        return self.wait_until_element_to_be_clickable(self.location).get_attribute("value")
+
 
     @allure.step("Set opening / closign hours: ({day}): {opening_hr} \n {closing_hr}")
     def update_opening_closing_hours(self, day, opening_hr, closing_hr):
@@ -83,6 +104,16 @@ class ClubProfilePage(BasePage):
         self._set_time(opening_elem, opening_hr, closing_elem, closing_hr)
         return self
 
+    @allure.step("Get opening hour single day")
+    def get_opening_hour(self, day: str):
+        opening_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[@type='time'][1]")
+        return self.wait_until_presence_of_element_located(opening_locator).get_attribute("value")[:5]
+
+    @allure.step("Get closing hour single day")
+    def get_closing_hour(self, day: str):
+        closing_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[@type='time'][2]")
+        return self.wait_until_presence_of_element_located(closing_locator).get_attribute("value")[:5]
+
 
     @allure.step("Set opening / closing hours simultaneously (mo-fr): {opening_hr} \n {closing_hr}")
     def update_opening_closing_hours_mo_fr(self, opening_hr, closing_hr):
@@ -92,7 +123,14 @@ class ClubProfilePage(BasePage):
         # Click the apply button
         self.wait_until_element_to_be_clickable(self.apply_simultaneously).click()
         return self
+    
+    @allure.step("Get opening hour simultaneously")
+    def get_opening_hour_simultaneously(self):
+        return self.wait_until_presence_of_element_located(self.opening_simultaneously).get_attribute("value")
 
+    @allure.step("Get closing hour simultaneously")
+    def get_closing_hour_simultaneously(self):
+        return self.wait_until_presence_of_element_located(self.closing_simultaneously).get_attribute("value")
 
     @allure.step("Upload club logo picture: {picture_name}")
     def update_logo_picture(self, picture_name):
@@ -117,4 +155,3 @@ class ClubProfilePage(BasePage):
 
         
     
-
