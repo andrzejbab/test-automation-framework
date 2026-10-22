@@ -1,32 +1,23 @@
-
+from ui.pom.base.base_page import BasePage
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from ui.pom.components.add_user_modal_component import AddUserModalComponent
 
 
-class MemberManagementPage:
+class MemberManagementPage(BasePage):
     def __init__(self, driver):
         super().__init__(driver)
-        self.add_member_button = (By.ID, 'add-member-button')
-        self.table_rows = (By.XPATH, '//*[@id="root"]/div/div[2]/div[2]/div/div/div/table/tbody/tr')  # Select all rows in the table body
+        # Components
+        self.add_modal_user_component = AddUserModalComponent(self.driver)
 
-    def click_add_member(self):
-        self.club_sidebar.go_to_members()
-        self.wait.until(EC.element_to_be_clickable(self.add_member_button)).click()
+        # Locators
+        self.add_club_member = (By.ID, "add-member-button")
 
-    def get_member(self):
-        self.club_sidebar.go_to_members()
-        rows = self.wait.until(EC.presence_of_all_elements_located(self.table_rows))
-        members = []
-        for row in rows:
-            cells = row.find_elements(By.TAG_NAME, 'td')
-            member = {
-                'first_name': cells[0].text,
-                'last_name': cells[1].text,
-                'email': cells[2].text,
-                'roles': cells[3].text.split(', '),  # Assuming roles are comma-separated              
-            }
-            members.append(member)
-        return members
+    def add_member(self):
+        self.wait_until_element_to_be_clickable(self.add_club_member).click()
+        return self.add_modal_user_component
+
+
+    
 
         
 

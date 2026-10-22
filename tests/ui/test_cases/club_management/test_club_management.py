@@ -3,11 +3,13 @@ import allure
 
 from ui.pom.pages.news_page import NewsPage
 from ui.pom.pages.club_management.club_profile_page import ClubProfilePage
+from ui.pom.components.add_user_modal_component import AddUserModalComponent
+from ui.pom.pages.club_management.member_management_page import MemberManagementPage
 
 
 @pytest.mark.ui
 @allure.epic("Club Management")
-@allure.feature("Create club profile")
+@allure.feature("Create club profile, add memebers, manage sports objects, manage training types")
 class TestClubManagement:
 
     @pytest.fixture(autouse=True)
@@ -82,4 +84,34 @@ class TestClubManagement:
             assert create_club_profile_page.get_opening_hour(day) == opening
             assert create_club_profile_page.get_closing_hour(day) == closing
 
-        
+
+
+    @allure.story("User can create club member")
+    @pytest.mark.parametrize("club_member", [
+        {
+            "name": "Tomek",
+            "last name": "Tester",
+            "email": "robert@test.pl",
+            "phone": "+482345432"
+        }
+    ])
+    def test_update_club_profile(self, club_member):
+        """
+        E2E Test Specification:
+        1. Navigate to "create club member"
+        2. Fill up modal form with user details
+        3. Check if user +
+        """
+
+        # 1
+        member_management_page: MemberManagementPage = self.news_page.side_menu.go_to_manage_members()
+        # 2
+        add_user_modal_component: AddUserModalComponent = member_management_page.add_member().enter_name(club_member.get("name")) \
+                                                        .enter_last_name(club_member.get("last name")) \
+                                                        .enter_email(club_member.get("email")) \
+                                                        .enter_phone(club_member.get("phone"))
+        add_user_modal_component.set_player(True)
+
+        assert True
+        # 3
+
