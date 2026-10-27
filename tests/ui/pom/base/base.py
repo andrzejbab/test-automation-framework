@@ -8,6 +8,14 @@ from selenium.webdriver.common.action_chains import ActionChains
 class Base:
     def __init__(self, driver):
         self.driver = driver
+        self.wait = None
+        self.set_defualt_driver_wait_time()
+
+    def change_driver_wait_time(self, time_sec: int):
+        self.wait = WebDriverWait(self.driver, time_sec)
+        return self
+
+    def set_defualt_driver_wait_time(self):
         self.wait = WebDriverWait(self.driver, WAITTIMEOUT_SECONDS)
 
     def wait_until_url_contain(self, text):

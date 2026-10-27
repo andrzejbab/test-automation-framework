@@ -97,8 +97,8 @@ class ClubProfilePage(BasePage):
 
     @allure.step("Set opening / closign hours: ({day}): {opening_hr} \n {closing_hr}")
     def update_opening_closing_hours(self, day, opening_hr, closing_hr):
-        opening_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[@type='time'][1]")
-        closing_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[@type='time'][2]")
+        opening_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[1]")
+        closing_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[2]")
         opening_elem = self.wait_until_presence_of_element_located(opening_locator)
         closing_elem = self.wait_until_presence_of_element_located(closing_locator)
         self._set_time(opening_elem, opening_hr, closing_elem, closing_hr)
@@ -106,12 +106,12 @@ class ClubProfilePage(BasePage):
 
     @allure.step("Get opening hour single day")
     def get_opening_hour(self, day: str):
-        opening_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[@type='time'][1]")
+        opening_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[1]")
         return self.wait_until_presence_of_element_located(opening_locator).get_attribute("value")[:5]
 
     @allure.step("Get closing hour single day")
     def get_closing_hour(self, day: str):
-        closing_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[@type='time'][2]")
+        closing_locator = (By.XPATH, f"//div[div[normalize-space()='{day}']]/input[2]")
         return self.wait_until_presence_of_element_located(closing_locator).get_attribute("value")[:5]
 
 
