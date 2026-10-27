@@ -1,11 +1,11 @@
 import allure
-from ui.pom.base.base_page import BasePage
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from ui.pom.pages.user_management.login_page import LoginPage
+from ui.pom.base.base import Base
 
 
-class ChangePasswordPage(BasePage):
+class ChangePasswordPage(Base):
     SUCCESS_MSG = "Hasło zostało zmienione. Możesz się teraz zalogować."
 
     def __init__(self, driver):

@@ -1,8 +1,9 @@
-from ui.pom.base.base_page import BasePage
 from selenium.webdriver.common.by import By
 import allure
 from utility.utility import get_url_ui
 import time
+
+from ui.pom.base.base_page import BasePage
 
 
 class LandingPage(BasePage):

@@ -1,10 +1,11 @@
 import allure
 from selenium.webdriver.common.by import By
-from ui.pom.base.base_page import BasePage    
+   
 from ui.constants import LOGIN_URL_FRAGMENT, CLUB_MANAGEMENT_URL_FRAGMENT
 from selenium.common.exceptions import TimeoutException
 
 from utility.utility import get_url_ui
+from ui.pom.base.base_page import BasePage 
 
 
 class LoginPage(BasePage):
