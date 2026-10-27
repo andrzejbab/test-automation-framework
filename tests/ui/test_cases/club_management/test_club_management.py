@@ -32,7 +32,7 @@ class TestClubManagement:
         "sobota": ["Sobota", "08:00", "21:00"],
         "niedziela": ["Niedziela", "08:00", "21:00"],
     }])
-    def test_update_club_profile(self, club_profile):
+    def test_update_club_profile_e2e(self, club_profile):
         """
         E2E Test Specification:
         1. Navigate to create club profile
@@ -90,28 +90,34 @@ class TestClubManagement:
     @pytest.mark.parametrize("club_member", [
         {
             "name": "Tomek",
-            "last name": "Tester",
+            "last_name": "Tester",
             "email": "robert@test.pl",
-            "phone": "+482345432"
+            "phone": "+482345432",
+            "profile_picture": "member_pic1.png",
+            "role": (AddUserModalComponent.Roles.COACH, True)
         }
     ])
-    def test_update_club_profile(self, club_member):
+    def test_create_member_profile_e2e(self, club_member):
         """
         E2E Test Specification:
         1. Navigate to "create club member"
         2. Fill up modal form with user details
-        3. Check if user +
+        3
+        3. Check if user is saved correctly
         """
 
         # 1
         member_management_page: MemberManagementPage = self.news_page.side_menu.go_to_manage_members()
         # 2
         add_user_modal_component: AddUserModalComponent = member_management_page.add_member().enter_name(club_member.get("name")) \
-                                                        .enter_last_name(club_member.get("last name")) \
+                                                        .enter_last_name(club_member.get("last_name")) \
                                                         .enter_email(club_member.get("email")) \
-                                                        .enter_phone(club_member.get("phone"))
-        add_user_modal_component.set_player(True)
+                                                        .enter_phone(club_member.get("phone")) \
+                                                        .add_profile_picture(club_member.get("profile_picture"))\
+                                                        .set_role(*club_member.get("role"))
+        member_management_page: MemberManagementPage = add_user_modal_component.save_member()                                                
 
-        assert True
         # 3
+        # Todo
+        assert True
 

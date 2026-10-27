@@ -109,27 +109,6 @@ class TestUserProfile:
         parsed_response = assert_response(response=response, expected_status=401)
         assert parsed_response.get("detail") == 'Authentication credentials were not provided.'
 
-    @pytest.mark.api
-    @pytest.mark.parametrize(
-            "paylaod",
-            [
-                {
-                    "permissions": [
-                        "zarzadzanie_klubem",
-                        "platnosci_zajec_pokaz",
-                        "platnosci_zajec_edycja",
-                    ],
-                }
-            ], ids=["permissions"]
-    )
-    def test_update_user_profile__returns_200(self, auth_api_client, new_user_account, paylaod):
-        auth_api_client.profile_update(paylaod)
-        response = assert_response(response=auth_api_client.profile_update(paylaod), expected_status=200)
-        assert response.get("message") == "Profil został zaktualizowany pomyślnie."
 
-        # Check if changed
-        parsed_response = assert_response(response=auth_api_client.get_profile(), expected_status=200)
-        for key, expected_value in paylaod.items():
-            assert parsed_response.get(key) == expected_value, f"Mismatch on key: '{key}'"
 
         

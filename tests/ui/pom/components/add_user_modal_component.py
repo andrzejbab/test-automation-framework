@@ -1,9 +1,16 @@
 import allure
+from pathlib import Path
 from selenium.webdriver.common.by import By
 from ui.pom.base.base_component import BaseComponent
+from utility.utility import get_abs_path_to_tests
+
 
 
 class AddUserModalComponent(BaseComponent):
+
+    class Roles:
+        COACH = "coach"
+        PLAYER = "player"
 
     def __init__(self, driver):
         super().__init__(driver)
@@ -17,6 +24,7 @@ class AddUserModalComponent(BaseComponent):
         self.email = (By.ID, 'email')
         self.phone = (By.ID, 'phone')
         self.no_email_available = (By.ID, 'member-no-email')
+        self.profile_picture = (By.ID, 'profile-photo')
 
         # member roles
         self.role_player = (By.ID, 'role-zawodnik')
@@ -30,6 +38,12 @@ class AddUserModalComponent(BaseComponent):
         self.role_gosc = (By.ID, 'role-gosc')
 
         self.save_button = (By.ID, 'save-member-button')
+
+    def _get_role_locator(self, profile: Roles):
+        if AddUserModalComponent.Roles.COACH:
+            return self.role_coach
+        elif AddUserModalComponent.Roles.PLAYER:
+            return self.role_player
 
     def wait_for_modal(self):
         if self.modal is None:
@@ -76,24 +90,22 @@ class AddUserModalComponent(BaseComponent):
         self._clear_and_send_keys(self.wait_for_modal().find_element(*self.phone), phone)
         return self
 
-    @allure.step("Set player: {}")
-    def set_player(self, select: bool):
-        self._checkbox_selection(self.wait_for_modal().find_element(*self.role_player), select)
+    @allure.step("Add profile picture: {picture_name}")
+    def add_profile_picture(self, picture_name: str):
+        picture_path = str(Path(get_abs_path_to_tests(),"resource", picture_name))
+        self.wait_until_presence_of_element_located(self.profile_picture).send_keys(picture_path)
         return self
 
-    @allure.step("Set coach: {}")
-    def set_coach(self, select: bool):
-        self._checkbox_selection(self.wait_for_modal().find_element(*self.role_coach), select)
+    @allure.step("Set member role: {role}, select: {select}")
+    def set_role(self, role: Roles, select: bool):
+        self._checkbox_selection(self.wait_for_modal().find_element(*self._get_role_locator(role)), select)
         return self
 
     @allure.step("Save member")
     def save_member(self):
-        self.wait_until_element_to_be_clickable(self.save_button, move_to_element=True)
+        self.wait_until_element_to_be_clickable(self.save_button, move_to_element=True).click()
+        return 
         
-    #@allure.step("Set member role: {role}")
-    #def set_member_role(self, role: str):
-    #    self._checkbox_selection(self.wait_for_modal().find_element(*self.role_player))
-    #    return self
 
 
 
