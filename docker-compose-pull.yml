@@ -16,9 +16,9 @@ services:
       - FRONTEND_HOST=${FRONTEND_HOST:-http://localhost:3000}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://localhost:3000,http://localhost:8000}
-      - DJANGO_SUPERUSER_USERNAME=${DJANGO_ADMIN_USER}
-      - DJANGO_SUPERUSER_EMAIL=${DJANGO_ADMIN_EMAIL}
-      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_ADMIN_PASSWORD}
+      - DJANGO_SUPERUSER_USERNAME=${DJANGO_ADMIN_USER:-test_admin}
+      - DJANGO_SUPERUSER_EMAIL=${DJANGO_ADMIN_EMAIL:-test_admin@local.local}
+      - DJANGO_SUPERUSER_PASSWORD=${DJANGO_ADMIN_PASSWORD:-test_admin_pass_1234567}
 
   frontend:
     image: ghcr.io/andrzejbab/klubster/frontend:latest
@@ -29,9 +29,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      - REACT_APP_API_HOST=""
+      - REACT_APP_API_HOST=
       #- REACT_APP_API_HOST=${REACT_APP_API_HOST}
-      - REACT_APP_FRONTEND_HOST= ${REACT_APP_FRONTEND_HOST}
+      - REACT_APP_FRONTEND_HOST=${REACT_APP_FRONTEND_HOST:-http://localhost:3000}
 
 
   mailpit:
