@@ -39,7 +39,7 @@ This repository demonstrates a complete automation pipeline for a SaaS product d
 
 ## Environment Setup for GitHub Actions CI
 
-The CI pipeline reads configuration from GitHub Actions secrets and variables. Values are injected into the test environment and Docker Compose configuration before the application stack and test suites are started.
+The CI pipeline reads configuration from GitHub Actions secrets and variables.Values are injected into the test environment and Docker Compose configuration before the application stack and test suites are started.
 
 Required GitHub Actions configuration:
 - `GHCR_PAT` — GitHub Container Registry token used to pull the required Docker images.
@@ -49,8 +49,13 @@ Recommended GitHub secrets:
 - `DJANGO_ADMIN_USER`
 - `DJANGO_ADMIN_EMAIL`
 - `DJANGO_ADMIN_PASSWORD`
+- `POSTGRES_DB`
+- `POSTGRES_USER`
+- `POSTGRES_PASSWORD`
 
 Recommended GitHub variables:
+- `POSTGRES_HOST`
+- `POSTGRES_PORT`
 - `BACKEND_HOST`
 - `FRONTEND_HOST`
 - `ALLOWED_HOSTS`
@@ -60,15 +65,23 @@ Recommended GitHub variables:
 - `MAILPIT_HOST`
 - `UI_BROWSER`
 - `UI_HEADLESS`
+- `MOBILE`
 - `VUSERS`
 - `RAMPUP`
 - `HOLDFOR`
 
 If a secret or variable is not defined, the workflow falls back to local development defaults such as `http://localhost:8000` and `http://localhost:3000`.
 
-Example GitHub configuration:
+ CI Default configuration:
 
 ```bash
+# Postgres
+POSTGRES_DB=db_test
+POSTGRES_USER=db_test
+POSTGRES_PASSWORD=strong-database-password
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+
 # GitHub Secrets
 GHCR_PAT=your_github_token
 SECRET_KEY=your_secret_key
@@ -86,6 +99,7 @@ TEST_UI_BASE_URL=http://localhost:3000/
 MAILPIT_HOST=http://localhost:8025
 UI_BROWSER=chrome
 UI_HEADLESS=true
+MOBILE=false
 VUSERS=2
 RAMPUP=3s
 HOLDFOR=20s
@@ -120,6 +134,13 @@ Example URLs:
 - Codespace: `https://<hash>-8000.app.github.dev`
 
 ```env
+# Postgres
+POSTGRES_DB=db_test
+POSTGRES_USER=db_test
+POSTGRES_PASSWORD=strong-database-password
+POSTGRES_HOST=postgres
+POSTGRES_PORT=5432
+
 # Target application
 REACT_APP_API_HOST=http://127.0.0.1:8000
 REACT_APP_FRONTEND_HOST=http://127.0.0.1:3000
@@ -141,6 +162,11 @@ UI_BROWSER=chrome
 # UI Test headless = false / install browser locally or use VNC in Codespaces
 UI_HEADLESS=true
 MOBILE=false
+
+# JMeter
+VUSERS=2
+RAMPUP=3s
+HOLDFOR=20s
 ```
 
 ### Optional CLI overrides
@@ -175,7 +201,7 @@ This is useful when you want to run the same suite against a different environme
 ## Getting Started
 
 ### 1) Start the target application
-The application designated for testing is a web-based Software as a Service (SaaS) solution for small sports club management ahead of its upcoming public release.
+The application designated for testing is a web-based Software as a Service (SaaS) solution for small sports club management ahead of its upcoming release.
 
 Pull the required Docker images and start the target application stack:
 
@@ -221,11 +247,10 @@ or use: __./scripts/install_jmeter.sh__
 
 Then use the Linux binary path:
 ```bash
-export JMETER_HOME=/workspaces/test-automation-framework/apache-jmeter-5.6.3
+export JMETER_HOME="$PWD/apache-jmeter-5.6.3"
 export PATH="$JMETER_HOME/bin:$PATH"
 which jmeter
 ```
-or use: __./scripts/export_jmeter.sh__
 
 
 
@@ -294,15 +319,25 @@ The load test configuration requires the following parameters to be defined:
 - `hold-for`: duration for which the target load is sustained
 
 ```bash
+# Update taurus_test_suite.yml depending on env variables (VUSERS, RAMPUP, HOLDFOR) and TEST_API_BASE_URL 
 pytest tests/performance/technical/test_technical_update_jmeter_target.py
 
+# Create test user spezified in taurus_test_suite.yml (concurrency)
+pytest tests/performance/technical/test_technical_create_user.py
+
+#Start performance test
 python -m bzt \
   -o settings.artifacts-dir="tests/jmeter-report" \
   -o execution.1.concurrency="4" \
   -o execution.1.ramp-up="10s" \
   -o execution.1.hold-for="40s" \
   tests/performance/taurus_test_suite.yml
+
+# Cleanup - Remove users  
+pytest tests/performance/technical/test_technical_remove_user.py
 ```
+
+
 
 ## Test Reporting JMeter
 
