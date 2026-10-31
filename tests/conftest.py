@@ -70,5 +70,5 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 load_env_files()
 
 # Register shared fixtures for the entire test suite.
-pytest_plugins = ["fixtures.user_fixtures", "fixtures.user_fixtures_ui"]
+pytest_plugins = ["fixtures.shared_fixtures"]
 

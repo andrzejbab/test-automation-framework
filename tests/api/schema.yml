@@ -2783,6 +2783,19 @@ paths:
                     profile_id:
                       type: integer
                       example: 123
+                    email_verified:
+                      type: boolean
+                      example: true
+                    terms_accepted_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2026-10-25T16:21:12Z'
+                    privacy_policy_accepted_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2026-10-25T16:21:12Z'
           description: Authenticated user profile data.
         '401':
           content:
@@ -3117,9 +3130,8 @@ components:
           readOnly: true
         club_id:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
       required:
       - file
@@ -3133,9 +3145,8 @@ components:
           format: binary
         club_id:
           type: integer
-          maximum: 9223372036854775807
-          minimum: -9223372036854775808
-          format: int64
+          maximum: 2147483647
+          minimum: -2147483648
           nullable: true
       required:
       - file
@@ -3219,9 +3230,8 @@ components:
           readOnly: true
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         created_at:
           type: string
           format: date-time
@@ -3239,9 +3249,8 @@ components:
           format: binary
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
       required:
       - image
     ClubProfile:
@@ -3345,17 +3354,15 @@ components:
           maxLength: 100
         user_limit:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Maksymalna liczba użytkowników klubu. Brak wartości oznacza
             brak limitu.
         storage_limit_mb:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Maksymalna przestrzeń dyskowa klubu (MB). Brak wartości oznacza
             brak limitu.
@@ -3910,9 +3917,8 @@ components:
           format: binary
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
     PatchedClubProfileRequest:
       type: object
       properties:
@@ -3988,17 +3994,15 @@ components:
           maxLength: 100
         user_limit:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Maksymalna liczba użytkowników klubu. Brak wartości oznacza
             brak limitu.
         storage_limit_mb:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
           description: Maksymalna przestrzeń dyskowa klubu (MB). Brak wartości oznacza
             brak limitu.
@@ -4163,9 +4167,8 @@ components:
           format: binary
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
     PatchedSportObjectPriceRequest:
       type: object
       properties:
@@ -4203,19 +4206,16 @@ components:
           format: time
         min_reservation_minutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         max_recurring_days:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         cancellation_window_minutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         belongs_to_club:
           type: boolean
         pay_in_club_only:
@@ -4292,9 +4292,8 @@ components:
           maxLength: 100
         max_members:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
         age_range:
           type: string
@@ -4469,19 +4468,16 @@ components:
           format: time
         min_reservation_minutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         max_recurring_days:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         cancellation_window_minutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         belongs_to_club:
           type: boolean
         pay_in_club_only:
@@ -4585,9 +4581,8 @@ components:
           readOnly: true
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         created_at:
           type: string
           format: date-time
@@ -4605,9 +4600,8 @@ components:
           format: binary
         position:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
       required:
       - image
     SportObjectPrice:
@@ -4688,19 +4682,16 @@ components:
           format: time
         min_reservation_minutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         max_recurring_days:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         cancellation_window_minutes:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
         belongs_to_club:
           type: boolean
         pay_in_club_only:
@@ -4746,9 +4737,8 @@ components:
             type: integer
         recurring_weeks:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
         recurring_weekdays:
           nullable: true
@@ -4996,9 +4986,8 @@ components:
           maxLength: 100
         max_members:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
         age_range:
           type: string
@@ -5042,9 +5031,8 @@ components:
           maxLength: 100
         max_members:
           type: integer
-          maximum: 9223372036854775807
+          maximum: 2147483647
           minimum: 0
-          format: int64
           nullable: true
         age_range:
           type: string
