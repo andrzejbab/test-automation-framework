@@ -314,27 +314,16 @@ Then open the forwarded port `8001` in your browser.
 
 The load test configuration requires the following parameters to be defined:
 
-- `concurrency`: number of concurrent virtual users
-- `ramp-up`: duration required to reach the target concurrency level
-- `hold-for`: duration for which the target load is sustained
+- `concurrency`: number of concurrent virtual users (VUSERS in env file)
+- `ramp-up`: duration required to reach the target concurrency level (RAMPUP in env file)
+- `hold-for`: duration for which the target load is sustained (HOLDFOR in env file)
+- TEST_API_BASE_URL in env file
 
 ```bash
-# Update taurus_test_suite.yml depending on env variables (VUSERS, RAMPUP, HOLDFOR) and TEST_API_BASE_URL 
-pytest tests/performance/technical/test_technical_update_jmeter_target.py
-
-# Create test user spezified in taurus_test_suite.yml (concurrency)
-pytest tests/performance/technical/test_technical_create_user.py
-
 #Start performance test
 python -m bzt \
   -o settings.artifacts-dir="tests/jmeter-report" \
-  -o execution.1.concurrency="4" \
-  -o execution.1.ramp-up="10s" \
-  -o execution.1.hold-for="40s" \
   tests/performance/taurus_test_suite.yml
-
-# Cleanup - Remove users  
-pytest tests/performance/technical/test_technical_remove_user.py
 ```
 
 

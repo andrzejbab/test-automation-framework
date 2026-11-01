@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_TEST_USER_PATH = BASE_DIR / "data" / "jmeter_test_users.csv"
 TEST_SUITE_PATH = BASE_DIR / "taurus_test_suite.yml"
 
-@pytest.fixture
+
 def jmeter_user_count():
     config_path = TEST_SUITE_PATH
     with config_path.open(encoding="utf-8") as file:
@@ -26,11 +26,21 @@ def jmeter_user_count():
 
 
 @pytest.fixture
-def jmeter_new_user_accounts(api_client, jmeter_user_count):
+def jmeter_new_user_accounts(api_client, update_jmeter_target):
     """Create the account consumed by the JMeter CSV data set."""
     created_users = []
+
+    # Prepare csv data
     csv_path = DATA_TEST_USER_PATH
     csv_path.parent.mkdir(parents=True, exist_ok=True)
+    if csv_path.exists():
+        csv_path.unlink()
+
+    jmeter = next(
+        item for item in update_jmeter_target["execution"] if item.get("executor") == "jmeter"
+    )
+    jmeter_user_count = int(jmeter["concurrency"])
+
     for cnt in range(jmeter_user_count):
         user_data = make_user_data_abonament_basic()
         response = api_client.api_register_user(**user_data)
@@ -46,21 +56,8 @@ def jmeter_new_user_accounts(api_client, jmeter_user_count):
                 writer.writeheader()
             writer.writerow({"username": user_data["email"], "password": user_data["password"]})
         created_users.append(user_data)
+
     assert len(created_users) == jmeter_user_count
-
-
-@pytest.fixture
-def jmeter_remove_user_accounts(auth_api_client_admin):
-    # cleanup - remove user
-    csv_path = DATA_TEST_USER_PATH
-    csv_path.parent.mkdir(parents=True, exist_ok=True)
-    with csv_path.open(newline="", encoding="utf-8") as csv_file:
-        for row in csv.DictReader(csv_file):
-            response = auth_api_client_admin.api_delete_user(row["username"])
-            assert response.status_code == 200, f"Failed to delete user: {response.text}"
-    if csv_path.exists():
-        csv_path.unlink()
-    assert not csv_path.exists()
 
 
 @pytest.fixture
@@ -68,12 +65,16 @@ def update_jmeter_target(pytestconfig) -> None:
     """Update Taurus JMeter scenario target based on TEST_API_BASE_URL."""
     config_path = TEST_SUITE_PATH
     api_url = get_option_env(pytestconfig, "--api-base-url", "TEST_API_BASE_URL")
+    vusers = get_option_env(pytestconfig, "--vusers", "VUSERS")
+    rampup = get_option_env(pytestconfig, "--rampup", "RAMPUP")
+    holdfor = get_option_env(pytestconfig, "--holdfor", "HOLDFOR")
 
     protocol, host, port = resolve_jmeter_target(api_url)
 
     with open(config_path, "r", encoding="utf-8") as f:
         config = yaml.safe_load(f) or {}
 
+    # Set url properities
     jmeter_scenario = config.setdefault("scenarios", {}).get("jmeter-test")
     assert jmeter_scenario is not None
 
@@ -82,5 +83,16 @@ def update_jmeter_target(pytestconfig) -> None:
     properties["host"] = host
     properties["port_nr"] = int(port) if port else ""
 
+    jmeter_executor = next(
+        (item for item in config.get("execution", []) if item.get("executor") == "jmeter"),
+        None,
+    )
+    assert jmeter_executor is not None, "No JMeter executor found in Taurus configuration"
+    jmeter_executor["concurrency"] = int(vusers)
+    jmeter_executor["ramp-up"] = rampup
+    jmeter_executor["hold-for"] = holdfor
+
     with open(config_path, "w", encoding="utf-8") as f:
         yaml.safe_dump(config, f, sort_keys=False, default_flow_style=False)
+
+    return config

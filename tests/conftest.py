@@ -64,6 +64,27 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         help="Option to run tests for mobile devices (true|false)",
     )
 
+    parser.addoption(
+        "--vusers",
+        action="store",
+        default=None,
+        help="Set number of concurrent virtual users (overrides VUSERS)",
+    )
+
+    parser.addoption(
+        "--rampup",
+        action="store",
+        default=None,
+        help="Set duration required to reach the target concurrency level (overrides RAMPUP)",
+    )
+
+    parser.addoption(
+        "--holdfor",
+        action="store",
+        default=None,
+        help="Set duration for which the target load is sustained(overrides HOLDFOR)",
+    )
+
 
 
 # Load env files before fixtures run.
