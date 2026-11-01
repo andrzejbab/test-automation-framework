@@ -27,8 +27,10 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
-      - mailpit
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:

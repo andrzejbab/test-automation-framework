@@ -36,7 +36,7 @@ jobs:
           password: ${{ secrets.GHCR_PAT }}
 
       # Build and start services using Docker Compose
-      - name: Pull and start Docker containers (Backend, Frontend, Mailpit)
+      - name: Pull and start Docker containers (Backend, Frontend, Mailpit, Postgres)
         run: |
           docker compose -f docker-compose-pull.yml pull
           docker compose -f docker-compose-pull.yml up -d
