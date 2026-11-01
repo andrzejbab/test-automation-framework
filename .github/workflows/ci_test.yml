@@ -119,9 +119,6 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/tests/performance/data"
           touch "$TEST_USER_CSV_PATH"
 
-          export PYTHONPATH="$GITHUB_WORKSPACE/tests:$PYTHONPATH"
-          pytest tests/performance/technical/test_technical_create_user.py
-
           python -m bzt \
             -o settings.artifacts-dir="$GITHUB_WORKSPACE/jmeter-report" \
             -o scenarios.jmeter-test.properties.test_user_csv_path="$TEST_USER_CSV_PATH" \
