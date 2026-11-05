@@ -42,7 +42,7 @@ This repository demonstrates a complete automation pipeline for a SaaS product d
 The CI pipeline reads configuration from GitHub Actions secrets and variables.Values are injected into the test environment and Docker Compose configuration before the application stack and test suites are started.
 
 Required GitHub Actions configuration:
-- `GHCR_PAT` — GitHub Container Registry token used to pull the required Docker images.
+- `GHCR_PAT` — GitHub Container Registry token used to pull the required Docker images(test target).
 
 Recommended GitHub secrets:
 - `SECRET_KEY`
