@@ -6,6 +6,7 @@ from api.api_clients.api_client_base import ApiClient, MockApiClient
 from utility.utility import get_option_env, fetch_and_validate_tokens
 from utility.factories import make_user_data_abonament_basic
 from utility.emails import get_activation_token_from_email_body, clear_emails_mailpit
+from utility.db_manager import DatabaseManager
 
 
 @pytest.fixture(scope="session")
@@ -89,6 +90,19 @@ def new_user_account(activated_user, auth_api_client_admin):
     # Cleanup - remove user
     response = auth_api_client_admin.api_delete_user(activated_user.get("email"))
     assert response.status_code == 200, f"Failed to delete user: {response.text}"
+
+
+@pytest.fixture( scope="session")
+def db_connection(pytestconfig: pytest.Config):
+    postgres_db = get_option_env(pytestconfig, "--postgres_db", "POSTGRES_DB")
+    postgres_user = get_option_env(pytestconfig, "--postgres_user", "POSTGRES_USER")
+    postgres_password = get_option_env(pytestconfig, "--postgres_password", "POSTGRES_PASSWORD")
+    # DB_URL = "postgresql+psycopg://[USERNAME]:[PASSWORD]@[HOST]:[PORT]/[DATABASE_NAME]"
+    db_url = f"postgresql+psycopg://{postgres_user}:{postgres_password}@localhost:5432/{postgres_db}"
+    db_manager_obj = DatabaseManager(db_url=db_url)
+    yield db_manager_obj
+    # cleanup
+    db_manager_obj.close()
 
 
 @pytest.fixture(scope="session")

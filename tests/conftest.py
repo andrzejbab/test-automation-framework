@@ -85,6 +85,27 @@ def pytest_addoption(parser: pytest.Parser) -> None:
         help="Set duration for which the target load is sustained(overrides HOLDFOR)",
     )
 
+    parser.addoption(
+        "--postgres_db",
+        action="store",
+        default=None,
+        help="Postgres database name (overrides POSTGRES_DB)",
+    )
+
+    parser.addoption(
+        "--postgres_user",
+        action="store",
+        default=None,
+        help="Postgres database user name (overrides POSTGRES_USER)",
+    )
+
+    parser.addoption(
+        "--postgres_password",
+        action="store",
+        default=None,
+        help="Postgres database password (overrides POSTGRES_PASSWORD)",
+    )
+
 
 
 # Load env files before fixtures run.

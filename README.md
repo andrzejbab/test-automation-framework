@@ -339,6 +339,20 @@ or use: __./scripts/report_jmeter.sh__
 
 then open  http://localhost:8001/html/index.html
 
+## DB Postgres
+
+```
+# see available docker container
+docker ps
+
+# connect to postgres in docker
+docker exec -it <docker name> sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+
+# connect to postgres on localhost
+psql -h localhost -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+
+```
+
 
 ## Visual Debugging with VNC
 
