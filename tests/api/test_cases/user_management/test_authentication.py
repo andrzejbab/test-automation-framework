@@ -5,24 +5,40 @@ from utility.assertions import assert_response
 from utility.emails import get_activation_token_from_email_body
 from api.custom_pydantic_models import ApiUserManagementActivate
 from api.constants import USER_MANAGMENT_ACTIVATE_MESSAGE
+from tests.utility.sql_table_models import User
+from api.custom_pydantic_models import TokenRefreshUnauthorized
 
 @allure.epic("User Management")
 @allure.feature("Authentication")
 @pytest.mark.api  
 class TestAuthenticationToken:
 
-    @allure.story("As a newly registered user, I want to click account activation,\
-                   so that my account is verified and activated")
-    def test_activate_token_valid_activation_token_returns_302(self, api_client, registered_user):
+
+    @allure.story("Newly registered user account remains inactive prior to email verification")
+    def test_register_user_without_activation(self, registered_user, db_session):
+        email = registered_user.get('email')
+        count = (db_session.query(User)
+                .filter(User.username == email, User.is_active == True)).count()
+        assert count == 0, f"No active user expected, but found {count}"
+
+
+    @allure.story("As a newly registered user," \
+                "I want to click account activation,\
+                so that my account is verified and activated")
+    def test_activate_registered_user_valid_activation_token_returns_302(self, api_client, registered_user, db_session):
         email = registered_user.get('email')
         response = api_client.api_activate_user(get_activation_token_from_email_body(email))
         response = assert_response(response, expected_status=302)
         assert response is None
+        count = (db_session.query(User)
+                .filter(User.username == email, User.is_active == True)).count()
+        assert count == 1, f"Expected exactly 1 active user, but found {count}"
+        
 
 
     @allure.story("As a newly registered user, I want to click account activation,\
                    so that my account is verified and activated and reuse of token is blocked")
-    def test_activate_token_reuse_token_returns_400(self, api_client, registered_user):
+    def test_activate_registered_user_reuse_token_returns_400(self, api_client, registered_user, db_session):
         email = registered_user.get('email')
         token = get_activation_token_from_email_body(email)
         response = api_client.api_activate_user(token)
@@ -31,6 +47,9 @@ class TestAuthenticationToken:
         response = api_client.api_activate_user(token)
         response_parsed = assert_response(response, expected_status=400, schema=ApiUserManagementActivate)
         assert response_parsed.error == USER_MANAGMENT_ACTIVATE_MESSAGE
+        count = (db_session.query(User)
+                .filter(User.username == email, User.is_active == True)).count()
+        assert count == 1, f"Expected exactly 1 active user, but found {count}"
 
     @allure.story(
         "As a Release Manager, "
@@ -81,18 +100,23 @@ class TestAuthenticationToken:
         response = api_client.refresh_tokens(parsed_response.refresh)
         assert_response(response, expected_status=200, schema=TokenRefresh)
 
-    ### TODO: return 401 not documented in Schema ########
-    # @pytest.mark.parametrize(
-    #     "refresh_token,expected_status",
-    #     [
-    #         ("invalidtoken123", 401),
-    #         ("expiredtoken456", 401),
-    #     ],
-    # )
-    # def test_refresh_token_invalid_credentials_returns_401(self, api_client, refresh_token, expected_status):
-    #     response = api_client.refresh_tokens(refresh_token)
-    #     assert response.status_code == expected_status
-    #     assert_response(response, expected_status=401, schema=TokenRefresh)
+    @allure.story("When invalid tokens are used, refresh token should no be generated")
+    @pytest.mark.parametrize(
+        "refresh_token,expected_status",
+        [
+            ("invalidtoken123", 401),
+            ("expiredtoken456", 401),
+        ],
+    )
+    def test_refresh_token_invalid_credentials_returns_401(self, api_client, refresh_token, expected_status):
+        response = api_client.refresh_tokens(refresh_token)
+        assert response.status_code == expected_status
+        parsed_response = assert_response(response, expected_status=401, schema=TokenRefreshUnauthorized)
+        assert parsed_response.detail == "Token is invalid"
+        assert parsed_response.code == "token_not_valid"
+
+
+
 
 
 

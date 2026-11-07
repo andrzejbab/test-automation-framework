@@ -4,7 +4,7 @@ from api.api_clients.api_client_auth_user import ApiClientAuthUser
 from api.api_clients.api_client_auth_admin import ApiClientAuthAdmin 
 from api.api_clients.api_client_base import ApiClient, MockApiClient
 from utility.utility import get_option_env, fetch_and_validate_tokens
-from utility.factories import make_user_data_abonament_basic
+from utility.factories import make_user_data_abonament_basic, make_user_data_abonament_testing
 from utility.emails import get_activation_token_from_email_body, clear_emails_mailpit
 from utility.db_manager import DatabaseManager
 
@@ -60,7 +60,7 @@ def clean_mailpit(pytestconfig: pytest.Config):
 @pytest.fixture(scope="function")
 def registered_user(api_client):
     """Register a new user (unactivated) - for contract tests and activation flows"""
-    user_data = make_user_data_abonament_basic()
+    user_data = make_user_data_abonament_testing()
     response = api_client.api_register_user(**user_data)
     assert response.status_code == 201, f"Failed to register user: {response.text}"
     return user_data
@@ -92,8 +92,8 @@ def new_user_account(activated_user, auth_api_client_admin):
     assert response.status_code == 200, f"Failed to delete user: {response.text}"
 
 
-@pytest.fixture( scope="session")
-def db_connection(pytestconfig: pytest.Config):
+@pytest.fixture(scope="session")
+def db_manager(pytestconfig: pytest.Config):
     postgres_db = get_option_env(pytestconfig, "--postgres_db", "POSTGRES_DB")
     postgres_user = get_option_env(pytestconfig, "--postgres_user", "POSTGRES_USER")
     postgres_password = get_option_env(pytestconfig, "--postgres_password", "POSTGRES_PASSWORD")
@@ -103,6 +103,14 @@ def db_connection(pytestconfig: pytest.Config):
     yield db_manager_obj
     # cleanup
     db_manager_obj.close()
+
+@pytest.fixture(scope="function")
+def db_session(db_manager):
+    session_factory = db_manager.get_session_factory()
+    session = session_factory()
+    yield session
+    # Clean up
+    session.close()
 
 
 @pytest.fixture(scope="session")

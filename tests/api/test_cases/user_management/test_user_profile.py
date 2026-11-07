@@ -34,6 +34,10 @@ class TestUserProfile:
         }
     
 
+    @allure.story(
+        "Verify an authenticated user can retrieve their profile and that the "
+        "response contains their identity details and expected default settings."
+    )
     def test_get_user_profile_returns_200(
         self, auth_api_client, new_user_account, expected_profile_defaults
     ):
@@ -51,6 +55,10 @@ class TestUserProfile:
         for key, expected_value in expected_profile_defaults.items():
             assert parsed_response[key] == expected_value, f"Mismatch on key: '{key}'"
     
+    @allure.story(
+        "Verify the profile endpoint rejects unauthenticated requests with HTTP 401 "
+        "and the expected authentication error."
+    )
     def test_get_user_profile_not_authenticated_returns_401(self, no_auth_api_client):
         # Prepare
         paylaod = {
@@ -61,6 +69,10 @@ class TestUserProfile:
         assert parsed_response.get("detail") == paylaod.get("detail")
 
 
+    @allure.story(
+        "Verify an authenticated user can accept the legal terms and privacy policy, "
+        "and that both acceptance flags are saved in their profile."
+    )
     def test_accept_legal_terms_returns_200(self, auth_api_client, new_user_account):
         # Prepare
         payload = {
@@ -92,6 +104,10 @@ class TestUserProfile:
         ],
         ids=["both_false", "terms_false", "privacy_false", "missing_terms", "missing_privacy", "empty_payload"]
     )
+    @allure.story(
+        "Verify legal acceptance requests are rejected with HTTP 400 when either "
+        "acceptance flag is false or missing."
+    )
     def test_accept_legal_terms_returns__legal_acceptance_flags_missing_or_false__returns_400(self, auth_api_client, new_user_account, payload):
         # Prepare
         response = auth_api_client.accept_legal_terms(payload)
@@ -99,6 +115,10 @@ class TestUserProfile:
         assert parsed_response.get("error") == 'Aby kontynuować, zaakceptuj regulamin i politykę prywatności.'
 
 
+    @allure.story(
+        "Verify unauthenticated requests to accept legal terms are rejected with "
+        "HTTP 401 and the expected authentication error."
+    )
     def test_accept_legal_terms__not_authenticated__returns_401(self, no_auth_api_client, new_user_account):
         # Prepare
         payload = {

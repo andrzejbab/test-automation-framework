@@ -12,6 +12,8 @@ class DatabaseManager:
         """Initializes the database engine and session factory."""
         # pool_pre_ping=True automatically handles stale/dropped connections
         self.engine = create_engine(self.db_url, pool_pre_ping=True)
+        # sessionmaker returns a class(factory) configured to create
+        # new Session instances bound to your engine
         self.SessionLocal = sessionmaker(
                 autocommit=False, 
                 autoflush=False, 
@@ -37,7 +39,7 @@ class DatabaseManager:
         with self.SessionLocal() as session:
             try:
                 result = session.execute(text(command)).scalar()
-                session.commit() # Commit changes if it's an insert/update/delete
+                # session.commit() # Commit changes if it's an insert/update/delete
                 return result
             except Exception as e:
                 session.rollback() # Rollback if anything fails
@@ -45,4 +47,6 @@ class DatabaseManager:
                 raise
 
 
+    def get_session_factory(self):
+        return self.SessionLocal
 
