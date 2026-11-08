@@ -89,7 +89,9 @@ class ApiClient:
         payload = {"password": password}
         return self._request("post", f"/api/user_management/password_reset_confirm/{token}/", json=payload, headers=headers)
     
-
+    def api_password_reset_confirm_get(self, token: str) -> requests.Response:
+        headers = {'Authorization': None}
+        return self._request("get", f"/api/user_management/password_reset_confirm/{token}/", headers=headers)
 
 
     

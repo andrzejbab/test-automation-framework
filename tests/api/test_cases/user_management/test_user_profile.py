@@ -42,18 +42,17 @@ class TestUserProfile:
         self, auth_api_client, new_user_account, expected_profile_defaults
     ):
         # Act
-        response = auth_api_client.get_profile()
-        parsed_response = assert_response(response=response, expected_status=200)
+        response = assert_response(response=auth_api_client.get_profile(), expected_status=200)
 
         # 1. Assert account specific identity fields
         expected_email = new_user_account["email"]
-        assert parsed_response["username"] == expected_email
-        assert parsed_response["email"] == expected_email
-        assert isinstance(parsed_response["profile_id"], int)
+        assert response["username"] == expected_email
+        assert response["email"] == expected_email
+        assert isinstance(response["profile_id"], int)
 
         # 2. Assert static default profile fields & permissions
         for key, expected_value in expected_profile_defaults.items():
-            assert parsed_response[key] == expected_value, f"Mismatch on key: '{key}'"
+            assert response[key] == expected_value, f"Mismatch on key: '{key}'"
     
     @allure.story(
         "Verify the profile endpoint rejects unauthenticated requests with HTTP 401 "
