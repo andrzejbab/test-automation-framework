@@ -5,7 +5,7 @@ from utility.assertions import assert_response
 from utility.emails import get_activation_token_from_email_body
 from api.custom_pydantic_models import ApiUserManagementActivate
 from api.constants import USER_MANAGMENT_ACTIVATE_MESSAGE
-from tests.utility.sql_table_models import User
+from utility.sql_table_models import User
 from api.custom_pydantic_models import TokenRefreshUnauthorized
 
 @allure.epic("User Management")

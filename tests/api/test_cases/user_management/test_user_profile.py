@@ -12,7 +12,7 @@ class TestUserProfile:
     def expected_profile_defaults(self):
         """Default static fields and permissions expected for a basic user."""
         return {
-            "abonament": "basic",
+            "abonament": "testowy",
             "user_type": "abonament",
             "roles": ["administrator"],
             "permissions": [
