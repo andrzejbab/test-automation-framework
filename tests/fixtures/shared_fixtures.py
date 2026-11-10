@@ -4,7 +4,7 @@ from api.api_clients.api_client_auth_user import ApiClientAuthUser
 from api.api_clients.api_client_auth_admin import ApiClientAuthAdmin 
 from api.api_clients.api_client_base import ApiClient, MockApiClient
 from utility.utility import get_option_env, fetch_and_validate_tokens
-from utility.factories import make_user_data_abonament_basic, make_user_data_abonament_testing
+from utility.factories import make_user_data_abonament_testing
 from utility.emails import get_activation_token_from_email_body, clear_emails_mailpit
 from utility.db_manager import DatabaseManager
 

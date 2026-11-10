@@ -18,6 +18,11 @@ jobs:
       - name: Create .env file for Docker Compose
         run: |
           cat > .env << 'EOF'
+          POSTGRES_DB=${{ secrets.POSTGRES_DB || 'db_test' }}
+          POSTGRES_USER=${{ secrets.POSTGRES_USER || 'db_test' }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD || 'strong-database-password' }}
+          POSTGRES_HOST=${{ secrets.POSTGRES_HOST || 'postgres' }}
+          POSTGRES_PORT=${{ secrets.POSTGRES_PORT || '5432' }}
           SECRET_KEY=${{ secrets.SECRET_KEY || 'test_secret_1234567' }}
           BACKEND_HOST=${{ vars.BACKEND_HOST || 'http://localhost:8000' }}
           FRONTEND_HOST=${{ vars.FRONTEND_HOST || 'http://localhost:3000' }}
