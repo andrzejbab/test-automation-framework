@@ -21,6 +21,7 @@ This repository demonstrates a complete automation pipeline for a SaaS product d
 | Pytest | Test runner | Orchestrates test execution and integration with fixtures |
 | Selenium | UI automation | Automates browser interactions for E2E validation |
 | Schemathesis | API testing | Generates property-based API tests from OpenAPI specs |
+| SQLAlchemy | Database toolkit | Manages database engines and sessions and executes SQL queries |
 | Docker | Environment orchestration | Runs the app and dependencies in isolated containers |
 | Taurus | Orchestration | Coordinates and executes JMeter test plans with configurable load profiles and reusable test configuration |
 | JMeter | Load testing | Generates realistic user traffic and measures application performance under load |
@@ -72,7 +73,7 @@ Recommended GitHub variables:
 
 If a secret or variable is not defined, the workflow falls back to local development defaults such as `http://localhost:8000` and `http://localhost:3000`.
 
- CI Default configuration:
+ CI default configuration:
 
 ```bash
 # Postgres
@@ -84,16 +85,20 @@ POSTGRES_PORT=5432
 
 # GitHub Secrets
 GHCR_PAT=your_github_token
-SECRET_KEY=your_secret_key
-DJANGO_ADMIN_USER=your_admin
+SECRET_KEY=test_secret_1234567
+DJANGO_ADMIN_USER=test_admin
 DJANGO_ADMIN_EMAIL=your_admin@local.local
-DJANGO_ADMIN_PASSWORD=your_password
+DJANGO_ADMIN_PASSWORD=test_admin_pass_1234567
 
 # GitHub Variables
 BACKEND_HOST=http://localhost:8000
 FRONTEND_HOST=http://localhost:3000
 ALLOWED_HOSTS=localhost,127.0.0.1
 REACT_APP_FRONTEND_HOST=http://localhost:3000
+
+# Github Variables Tests
+TEST_API_ADMIN_USERNAME=test_admin
+TEST_API_ADMIN_PASSWORD=test_admin_pass_1234567
 TEST_API_BASE_URL=http://localhost:8000/
 TEST_UI_BASE_URL=http://localhost:3000/
 MAILPIT_HOST=http://localhost:8025
