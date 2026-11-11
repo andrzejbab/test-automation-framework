@@ -43,8 +43,8 @@ jobs:
       # Build and start services using Docker Compose
       - name: Pull and start Docker containers (Backend, Frontend, Mailpit, Postgres)
         run: |
-          docker compose -f docker-compose-pull.yml pull
-          docker compose -f docker-compose-pull.yml up -d
+          docker compose -f docker-compose.yml pull
+          docker compose -f docker-compose.yml up -d
 
       - name: Wait for Backend to be ready
         run: |

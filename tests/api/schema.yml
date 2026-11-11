@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Klubster API
+  title: Klubobaza API
   version: 1.0.0
-  description: Backend REST API for Klubster project
+  description: Backend REST API for Klubobaza project
 paths:
   /api/aktualnosci/threads/:
     get:
