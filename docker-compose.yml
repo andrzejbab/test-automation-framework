@@ -44,7 +44,7 @@ services:
       - POSTGRES_PORT=5432
       - BACKEND_HOST=${BACKEND_HOST:-http://localhost:8000}
       - FRONTEND_HOST=${FRONTEND_HOST:-http://localhost:3000}
-      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1},backend,frontend
       - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-http://localhost:3000,http://localhost:8000}
       - DJANGO_SUPERUSER_USERNAME=${DJANGO_ADMIN_USER:-test_admin}
       - DJANGO_SUPERUSER_EMAIL=${DJANGO_ADMIN_EMAIL:-test_admin@local.local}
@@ -62,6 +62,53 @@ services:
     environment:
       - REACT_APP_API_HOST=
       - REACT_APP_FRONTEND_HOST=${REACT_APP_FRONTEND_HOST:-http://localhost:3000}
+
+  test-runner:
+    profiles: ["test"]
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    init: true
+    user: "${LOCAL_UID:-1000}:${LOCAL_GID:-1000}"
+    working_dir: /workspace
+    ports:
+      - "127.0.0.1:8001:8001"
+      - "127.0.0.1:6080:6080"
+    volumes:
+      - .:/workspace
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - ${XAUTHORITY:-/dev/null}:/tmp/.Xauthority:ro
+    environment:
+      DISPLAY: ${DISPLAY:-}
+      XAUTHORITY: /tmp/.Xauthority
+      TEST_API_BASE_URL: http://backend:8000/
+      TEST_API_ADMIN_USERNAME: ${DJANGO_ADMIN_USER:-test_admin}
+      TEST_API_ADMIN_PASSWORD: ${DJANGO_ADMIN_PASSWORD:-test_admin_pass_1234567}
+      TEST_UI_BASE_URL: http://frontend/
+      MAILPIT_HOST: http://mailpit:8025
+      POSTGRES_DB: ${POSTGRES_DB:-db_test}
+      POSTGRES_USER: ${POSTGRES_USER:-db_test}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-strong-database-password}
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      UI_BROWSER: chrome
+      UI_HEADLESS: "true"
+      MOBILE: ${MOBILE:-false}
+      VUSERS: ${VUSERS:-2}
+      RAMPUP: ${RAMPUP:-3s}
+      HOLDFOR: ${HOLDFOR:-20s}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_started
+    entrypoint: ["/usr/local/bin/wait-for-test-services"]
+    command: ["sleep", "infinity"]
 
 
 volumes:

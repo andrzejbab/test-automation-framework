@@ -53,10 +53,10 @@ Recommended GitHub secrets:
 - `POSTGRES_DB`
 - `POSTGRES_USER`
 - `POSTGRES_PASSWORD`
-
-Recommended GitHub variables:
 - `POSTGRES_HOST`
 - `POSTGRES_PORT`
+
+Recommended GitHub variables:
 - `BACKEND_HOST`
 - `FRONTEND_HOST`
 - `ALLOWED_HOSTS`
@@ -96,7 +96,7 @@ FRONTEND_HOST=http://localhost:3000
 ALLOWED_HOSTS=localhost,127.0.0.1
 REACT_APP_FRONTEND_HOST=http://localhost:3000
 
-# Github Variables Tests
+# Test environment
 TEST_API_ADMIN_USERNAME=test_admin
 TEST_API_ADMIN_PASSWORD=test_admin_pass_1234567
 TEST_API_BASE_URL=http://localhost:8000/
@@ -120,17 +120,13 @@ This setup was tested locally on Ubuntu and GitHub Codespaces.
 
 Before starting, ensure the following tools are installed:
 
-- Docker and Docker Compose
-- Python 3.x
-- Node.js and npm
+- Docker Engine with the Docker Compose plugin
 - Git
-- Java JDK
 
-Use: ./scripts/setup_basic.sh
+Python, the browser, Java, JMeter, and Allure CLI are installed in the test-runner image; they do not need to be installed on the host.
+The runner targets `linux/amd64`; Docker uses emulation on ARM computers, which may run more slowly.
 
-Normally, when you add your user account to the docker group (using sudo usermod -aG docker $USER), you need to log out and log back in (or reboot) for the system to recognize your new permissions
-
-Create a `.env` file in the project root with the values required for local execution.
+Create a `.env` file in the project root with the values required to start the application. The test runner uses Compose service names for the API, UI, database, and Mailpit, so the localhost URLs in this example are for host-based access and are overridden inside the test container.
 
 When working in a browser-accessible environment such as GitHub Codespaces, the application is typically exposed through a proxy HTTPS endpoint rather than `localhost`. In those cases, use the generated Codespace URL instead of the local host address.
 
@@ -153,18 +149,21 @@ BACKEND_HOST=http://127.0.0.1:8000
 FRONTEND_HOST=http://127.0.0.1:3000
 ALLOWED_HOSTS=localhost,127.0.0.1, ,https://<hash>-8000.app.github.dev,https://<hash>-3000.app.github.dev
 SECRET_KEY=your_secret_key
-DJANGO_ADMIN_USER=your_admin
+DJANGO_ADMIN_USER=test_admin
 DJANGO_ADMIN_EMAIL=your_admin@local.local
-DJANGO_ADMIN_PASSWORD=your_password
+DJANGO_ADMIN_PASSWORD=test_admin_pass_1234567
 
 # Functional tests
 TEST_API_BASE_URL=http://127.0.0.1:8000
-TEST_API_ADMIN_USERNAME=your_admin
-TEST_API_ADMIN_PASSWORD=your_password
+TEST_API_ADMIN_USERNAME=test_admin
+TEST_API_ADMIN_PASSWORD=test_admin_pass_1234567
+# Optional credentials for mock authentication with --use-mock-client
+TEST_API_USERNAME=test_admin
+TEST_API_PASSWORD=test_admin_pass_1234567
 MAILPIT_HOST=http://127.0.0.1:8025
 TEST_UI_BASE_URL=http://127.0.0.1:3000
 UI_BROWSER=chrome
-# UI Test headless = false / install browser locally or use VNC in Codespaces
+# The Docker test runner uses headless Chrome
 UI_HEADLESS=true
 MOBILE=false
 
@@ -188,6 +187,14 @@ The values above are the default environment settings used by the suite, but the
 | `TEST_UI_BASE_URL` | `--ui-base-url` |
 | `MAILPIT_HOST` | `--api-mailpit-host` |
 | `MOBILE` | `--mobile` |
+| `VUSERS` | `--vusers` |
+| `RAMPUP` | `--rampup` |
+| `HOLDFOR` | `--holdfor` |
+| `POSTGRES_DB` | `--postgres_db` |
+| `POSTGRES_USER` | `--postgres_user` |
+| `POSTGRES_PASSWORD` | `--postgres_password` |
+
+Use `--use-mock-client` to force the shared API client to use the mock client. For mock token authentication, set `TEST_API_USERNAME` and `TEST_API_PASSWORD` to the expected credentials.
 
 Example:
 
@@ -208,67 +215,76 @@ This is useful when you want to run the same suite against a different environme
 ### 1) Start the target application
 The application designated for testing is a web-based Software as a Service (SaaS) solution for small sports club management ahead of its upcoming release.
 
-Pull the required Docker images and start the target application stack:
+If the application images are private, log in to GitHub Container Registry:
 
 ```bash
-export GITHUB_TOKEN="token_here"
-echo "$GITHUB_TOKEN" | docker login ghcr.io -u github_username --password-stdin
-docker compose -f docker-compose-pull.yml pull
-docker compose -f docker-compose-pull.yml up -d
+echo "$GITHUB_TOKEN" | docker login ghcr.io -u GITHUB_USERNAME --password-stdin
 ```
 
-### 2) Set up a Python virtual environment and test depedencies
+Pull and start the app, database, and Mailpit:
 
 ```bash
-sudo apt install python3.14-venv
-python3 -m venv tests/venv
-source tests/venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
+docker compose pull
+docker compose up -d
 ```
-or use: __./scripts/setup_python_virtual_environment.sh__
 
-### 3) Install browser(Chrome) dependencies
+### 2) Build the test runner
 
-For Linux-based UI testing, install Chromium and Google Chrome:
+The first build installs the Python test requirements, Chrome, Java, JMeter, and Allure CLI:
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y chromium chromium-driver
-wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt-get install -y ./google-chrome-stable_current_amd64.deb
-google-chrome --version
+docker compose build test-runner
 ```
-or use: __./scripts/install_chrome_dependencies.sh__
 
-### 4) Configure JMeter in Linux/Codespace
+### 3) Open a test-runner shell and run tests
 
-Install JMeter:
+The repository is mounted into the container at `/workspace`, so edits and generated reports remain on your computer. On Linux or macOS, pass your user ID to avoid root-owned output files:
+
 ```bash
-wget https://downloads.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz
-tar -xzf apache-jmeter-5.6.3.tgz
-```
-or use: __./scripts/install_jmeter.sh__
-
-Then use the Linux binary path:
-```bash
-export JMETER_HOME="$PWD/apache-jmeter-5.6.3"
-export PATH="$JMETER_HOME/bin:$PATH"
-which jmeter
+LOCAL_UID="$(id -u)" LOCAL_GID="$(id -g)" \
+  docker compose --profile test run --rm test-runner bash
 ```
 
-
-
-
-## Running Functional Testing
-
-Make sure your virtual environment is active before running the suite.
-
-### Run all tests
+The runner waits for the application, frontend, and Mailpit to respond before opening the shell. From inside it:
 
 ```bash
 pytest -m "contract or api or ui"
 ```
+
+The container sets the service URLs and database connection settings, so no host-specific URL overrides are needed. Headless Chrome is configured by default.
+
+Run `exit` to leave the shell. Stop the app stack when finished with `docker compose down`; add `-v` only if you also want to delete the Postgres data volume.
+
+### Use VS Code Test and Debug buttons
+
+The repository includes a Dev Container configuration that connects VS Code to the test-runner container and starts the app dependencies.
+
+On Linux, set `LOCAL_UID` and `LOCAL_GID` in the project `.env` file to the values printed by `id -u` and `id -g`. This lets the container write test reports and generated files as your host user. For example, if those commands print `1001` and `1001`, add:
+
+```env
+LOCAL_UID=1001
+LOCAL_GID=1001
+```
+
+Then install the VS Code **Dev Containers** extension, open the repository folder, and run **Dev Containers: Reopen in Container** from the Command Palette. On first use, VS Code builds the test-runner image and starts the backend, frontend, Postgres, and Mailpit services. When setup completes:
+
+- Open the Testing panel to discover and run pytest tests in the container.
+- Use a test's **Debug Test** action to debug it in the container.
+- Or open a test file and press `F5` to use the **Debug current pytest file** launch configuration.
+
+The selected Python interpreter and installed test dependencies are inside the container; you do not need a local Python environment. The runner uses headless Chrome.
+
+## Running Functional Testing
+
+Run these commands inside the test-runner shell.
+
+### Run all functional tests
+
+```bash
+pytest -m "contract or api or ui"
+```
+
+This runs the contract, API, and UI test groups. It does not include the Pydantic model-generation helper or the separate JMeter performance tests below.
 
 ### Run API Contract tests only
 
@@ -288,33 +304,29 @@ pytest -m "api"
 pytest -m "ui"
 ```
 
+### Run the Pydantic model-generation helper
+
+```bash
+pytest tests/api/intern/test_create_pydantic_models.py
+```
+
 ### Test Reporting with Allure
 
-Test results are stored in `tests/allure-report`.
-
-Install Allure CLI:
+Pytest writes Allure results to `allure-results/` at the repository root. Generate a static report:
 
 ```bash
-sudo npm install -g allure-commandline
+allure generate allure-results -o allure-report --clean
 ```
-or use: __./scripts/install_allure.sh__
 
-View the report locally:
+To view it without installing tools on the host, exit the shell and serve the generated report from the runner:
 
 ```bash
-allure serve tests/allure-report
+LOCAL_UID="$(id -u)" LOCAL_GID="$(id -g)" \
+  docker compose --profile test run --rm --service-ports test-runner \
+  python3 -m http.server 8001 --directory allure-report
 ```
-or use: __./scripts/view_allure_results_local.sh__
 
-Generate a static report on a remote or Codespace environment:
-
-```bash
-allure generate tests/allure-report -o allure-report --clean
-python3 -m http.server 8001 --directory allure-report
-```
-or use: __./scripts/view_allure_results_remote.sh__
-
-Then open the forwarded port `8001` in your browser.
+Open `http://localhost:8001` in your browser.
 ## Running Non-Functional Testing
 
 The load test configuration requires the following parameters to be defined:
@@ -328,6 +340,7 @@ The load test configuration requires the following parameters to be defined:
 #Start performance test
 python -m bzt \
   -o settings.artifacts-dir="tests/jmeter-report" \
+  -o modules.jmeter.path="$JMETER_HOME/bin/jmeter" \
   tests/performance/taurus_test_suite.yml
 ```
 
@@ -336,13 +349,18 @@ python -m bzt \
 ## Test Reporting JMeter
 
 ```bash
-apache-jmeter-5.6.3/bin/jmeter -g "tests/jmeter-report/kpi.jtl" -o tests/jmeter-report/html
-
-python3 -m http.server 8001 --directory ./tests/jmeter-report
+"$JMETER_HOME/bin/jmeter" -g "tests/jmeter-report/kpi.jtl" -o tests/jmeter-report/html
 ```
-or use: __./scripts/report_jmeter.sh__
 
-then open  http://localhost:8001/html/index.html
+To view the report, exit the runner shell and start a server with its port published:
+
+```bash
+LOCAL_UID="$(id -u)" LOCAL_GID="$(id -g)" \
+  docker compose --profile test run --rm --service-ports test-runner \
+  python3 -m http.server 8001 --directory tests/jmeter-report
+```
+
+Open `http://localhost:8001/html/index.html`.
 
 ## DB Postgres
 
@@ -361,54 +379,33 @@ psql -h localhost -p 5432 -U "$POSTGRES_USER" -d "$POSTGRES_DB"
 
 ## Visual Debugging with VNC
 
+This optional workflow runs UI tests with a visible browser. The Docker test runner uses headless Chrome by default; its image also includes Xvfb and VNC tools for visible runs.
+
 When working in GitHub Codespaces or remote environments, you can run UI tests with a visible browser window by exposing a virtual desktop.
 
 For development / debugging with Codespace install extensions:  "Python Debugger", "Python", "Pylance" on your codespace
 
-### 1) Install VNC dependencies
+### 1) Rebuild the test runner if needed
 
 ```bash
-sudo apt-get install -y xvfb x11vnc fluxbox novnc
+docker compose build test-runner
 ```
-or use: __./scripts/install_vnc.sh__
 
-### 2) Start the virtual desktop
+### 2) Run the visible UI tests
 
 ```bash
-Xvfb :99 -screen 0 1920x1080x24 &
-
-export DISPLAY=:99
-
-fluxbox >/tmp/fluxbox.log 2>&1 &
-
-x11vnc -display :99 -forever -shared -rfbport 5900 -nopw >/tmp/x11vnc.log 2>&1 & /usr/share/novnc/utils/novnc_proxy --vnc localhost:5900 --listen 6080 >/tmp/novnc.log 2>&1 &
+./scripts/run_ui_tests_no_headless.sh
 ```
-or use: __./scripts/start_vnc_desktop.sh__
 
-### 3) Connect to the browser session
-
-Open:
+The script starts a virtual desktop on display `:99` if one is not already running. In VS Code, open the forwarded port at:
 
 ```text
 http://localhost:6080/vnc.html
 ```
 
-Then click Connect.
+Click **Connect** to view the browser. The VNC server uses the Xvfb display, so the startup script ignores any inherited `WAYLAND_DISPLAY` setting. Outside the Dev Container, publish or forward port `6080` to access noVNC.
 
-### 4) Run UI tests visually
-
-```bash
-export DISPLAY=:99
-export CHROME_BINARY=/usr/bin/google-chrome
-
-pytest tests/ui -m ui --ui-headless false
-```
-
-or use: __./scripts/run_ui_tests_no_headless.sh__
-
-You can also set `UI_HEADLESS=false` and `DISPLAY=:99` in your `.env` file for use with the VS Code testing panel.
-
-### 5) Open Jmeter GUI with VNC
+### Open JMeter GUI with VNC
 ```bash
 export DISPLAY=:99
 export JMETER_HOME=/workspaces/test-automation-framework/apache-jmeter-5.6.3
@@ -419,10 +416,7 @@ or use: __./scripts/start_jmeter_in_vnc.sh__
 
 ## VS Code Configuration Tips
 
-1. Select the correct Python interpreter:
-   - Press `Ctrl+Shift+P`
-   - Run `Python: Select Interpreter`
-   - Choose `./tests/venv/bin/python`
+1. When reopened in the Dev Container, VS Code uses `/usr/local/bin/python` from the test-runner image. If needed, use `Python: Select Interpreter` and choose that interpreter.
 
 2. Disable preview tab behavior for files:
    - Press `Ctrl+Shift+P`

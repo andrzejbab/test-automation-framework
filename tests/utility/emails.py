@@ -1,11 +1,17 @@
 import requests
 import re
+import os
+
+
+def _mailpit_base_url() -> str:
+    return os.getenv("MAILPIT_HOST", "http://localhost:8025").rstrip("/")
 
 def get_email_text(recipient: str, subject_query: str = "") -> str:
     """Finds the most recent email for a recipient and returns its plain text body."""
     # Search messages
     query = f"to:{recipient} {subject_query}".strip()
-    response = requests.get("http://localhost:8025/api/v1/messages", params={"query": query})
+    base_url = _mailpit_base_url()
+    response = requests.get(f"{base_url}/api/v1/messages", params={"query": query})
     data = response.json()
     
     messages = data.get("messages", [])
@@ -15,7 +21,7 @@ def get_email_text(recipient: str, subject_query: str = "") -> str:
     latest_id = messages[0]["ID"]
     
     # Fetch full message details
-    msg_response = requests.get(f"http://localhost:8025/api/v1/message/{latest_id}")
+    msg_response = requests.get(f"{base_url}/api/v1/message/{latest_id}")
     return msg_response.json().get("Text", "")
 
 def get_activation_token_from_email_body(recipient: str):

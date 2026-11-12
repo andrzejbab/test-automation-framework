@@ -1,0 +1,31 @@
+{
+  "name": "Test Automation Framework",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "test-runner",
+  "runServices": [
+    "postgres",
+    "mailpit",
+    "backend",
+    "frontend",
+    "test-runner"
+  ],
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+  "overrideCommand": false,
+  "forwardPorts": [3000, 8000, 8001, 6080, 8025],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.vscode-pylance"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.testing.pytestEnabled": true,
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestArgs": ["tests"]
+      }
+    }
+  }
+}

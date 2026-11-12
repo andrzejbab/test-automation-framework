@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-allure serve tests/allure-results
+allure serve allure-results

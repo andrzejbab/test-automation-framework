@@ -93,10 +93,9 @@ jobs:
 
       - name: Generate Allure HTML Report
         if: always()
-        # Ensure 'allure-results' matches the directory set in your pytest.ini
         run: |
           npm install -g allure-commandline
-          allure generate tests/allure-results -o allure-report --clean
+          allure generate allure-results -o allure-report --clean
 
       - name: Upload Allure Report as Artifact
         if: always()

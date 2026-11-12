@@ -1,0 +1,46 @@
+FROM python:3.11-slim-bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    HOME=/tmp \
+    JMETER_HOME=/opt/apache-jmeter-5.6.3 \
+    PATH="/opt/apache-jmeter-5.6.3/bin:${PATH}"
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        fluxbox \
+        git \
+        gnupg \
+        openjdk-17-jre-headless \
+        novnc \
+        x11vnc \
+        xvfb \
+    && install -d -m 0755 /etc/apt/keyrings \
+    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
+        | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg \
+    && chmod a+r /etc/apt/keyrings/google-chrome.gpg \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" \
+        > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
+        google-chrome-stable \
+        nodejs \
+        npm \
+    && curl -fsSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.tgz \
+        | tar -xz -C /opt \
+    && npm install --global allure-commandline \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_TOOL_OPTIONS="-Duser.home=/tmp"
+
+WORKDIR /workspace
+
+COPY requirements.txt /tmp/requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade pip \
+    && python -m pip install --no-cache-dir -r /tmp/requirements.txt
+
+COPY scripts/wait-for-test-services.sh /usr/local/bin/wait-for-test-services
+RUN chmod +x /usr/local/bin/wait-for-test-services
+
+CMD ["bash"]

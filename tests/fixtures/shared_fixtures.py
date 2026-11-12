@@ -1,5 +1,7 @@
+import os
 import pytest
 from typing import Dict
+from sqlalchemy.engine import URL
 from api.api_clients.api_client_auth_user import ApiClientAuthUser
 from api.api_clients.api_client_auth_admin import ApiClientAuthAdmin 
 from api.api_clients.api_client_base import ApiClient, MockApiClient
@@ -97,8 +99,14 @@ def db_manager(pytestconfig: pytest.Config):
     postgres_db = get_option_env(pytestconfig, "--postgres_db", "POSTGRES_DB")
     postgres_user = get_option_env(pytestconfig, "--postgres_user", "POSTGRES_USER")
     postgres_password = get_option_env(pytestconfig, "--postgres_password", "POSTGRES_PASSWORD")
-    # DB_URL = "postgresql+psycopg://[USERNAME]:[PASSWORD]@[HOST]:[PORT]/[DATABASE_NAME]"
-    db_url = f"postgresql+psycopg://{postgres_user}:{postgres_password}@localhost:5432/{postgres_db}"
+    db_url = URL.create(
+        "postgresql+psycopg",
+        username=postgres_user,
+        password=postgres_password,
+        host=os.getenv("POSTGRES_HOST", "localhost"),
+        port=int(os.getenv("POSTGRES_PORT", "5432")),
+        database=postgres_db,
+    )
     db_manager_obj = DatabaseManager(db_url=db_url)
     yield db_manager_obj
     # cleanup
@@ -126,8 +134,6 @@ def valid_credentials_admin(pytestconfig: pytest.Config) -> Dict[str, str]:
         "username": get_option_env(pytestconfig, "--api-admin-username", "TEST_API_ADMIN_USERNAME"),
         "password": get_option_env(pytestconfig, "--api-admin-password", "TEST_API_ADMIN_PASSWORD"),
     }
-
-
 
 
 

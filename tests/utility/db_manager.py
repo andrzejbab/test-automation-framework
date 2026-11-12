@@ -1,10 +1,11 @@
 from sqlalchemy import create_engine, text
+from sqlalchemy.engine import URL
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 Base = declarative_base()
 
 class DatabaseManager:
-    def __init__(self, db_url: str):
+    def __init__(self, db_url: str | URL):
         self.db_url = db_url
         self.engine = None
         self.SessionLocal = None
@@ -49,4 +50,3 @@ class DatabaseManager:
 
     def get_session_factory(self):
         return self.SessionLocal
-
